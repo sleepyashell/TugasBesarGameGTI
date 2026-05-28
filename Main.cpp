@@ -13,11 +13,9 @@
 #include "Drawing.h"
 #include "Texture.h"
 #include "Item.h"
+#include "Player.h"
 
 using namespace std;
-// ==========================================
-// DATA STRUCTURE & GLOBAL STATE
-// ==========================================
 
 bool keys[256];
 float playerX      = 33.0f;
@@ -25,17 +23,15 @@ float playerY      = 0.8f;
 float playerZ      = 2.0f;
 float playerSpeed  = 0.12f;
 float pRadius      = 0.25f;
+float playerAngle  = 0.0f;
+float targetAngle  = 0.0f;
+float walkTimer    = 0.0f;
+bool  isWalking    = false;
 
-
-// TAMBAHKAN DUA BARIS INI DI SINI:
-float flickerTimer = 0.0f;
+float flickerTimer     = 0.0f;
 float flickerIntensity = 1.0f;
 
 vector<BoundingBox> colliders;
-
-// ==========================================
-// CORE
-// ==========================================
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -45,19 +41,15 @@ void display() {
               playerX, playerY + 0.5f, playerZ,
               0.0f, 1.0f, 0.0f);
 
-    // Update flicker lampu darurat
     flickerTimer += 0.05f;
-    // Kombinasi beberapa sinus frekuensi berbeda ? efek flicker tidak beraturan
     flickerIntensity = 0.75f
         + 0.15f * sinf(flickerTimer * 7.3f)
         + 0.08f * sinf(flickerTimer * 23.1f)
         + 0.04f * sinf(flickerTimer * 57.9f);
     if (flickerIntensity < 0.0f) flickerIntensity = 0.0f;
 
-    // Update posisi light setiap frame 
     updateLightPositions();
 
-    // Terapkan flicker ke lampu koridor
     GLenum ptLights[] = { GL_LIGHT2, GL_LIGHT3, GL_LIGHT4 };
     for (int f = 0; f < NUM_FLOORS; f++) {
         GLfloat pt_diff[] = {
@@ -74,7 +66,6 @@ void display() {
     drawAllPosters();
     drawItems();
 
-    // Elemen transparan per lantai (front walls & corridor front)
     for (int f = 0; f < NUM_FLOORS; f++) {
         float fy = f * FLOOR_HEIGHT;
         glPushMatrix();
@@ -92,13 +83,7 @@ void display() {
         glPopMatrix();
     }
 
-    // Player 
-    glPushMatrix();
-        glTranslatef(playerX, playerY, playerZ);
-        matPlayer();
-        glScalef(0.6f, 1.6f, 0.3f);
-        glutSolidCube(1);
-    glPopMatrix();
+    drawPlayer();
 
     glutSwapBuffers();
 }
@@ -110,12 +95,23 @@ void handleInput() {
     if (keys['a'] || keys['A']) mx -= 1;
     if (keys['d'] || keys['D']) mx += 1;
     if (abs(mx) + abs(mz) > 0) {
+        isWalking = true;
+        walkTimer += 0.15f;
+        targetAngle = atan2f(mx, mz) * 180.0f / 3.14159f;
         float mag = sqrt(mx * mx + mz * mz);
         float sx  = (mx / mag) * playerSpeed;
         float sz  = (mz / mag) * playerSpeed;
         if (!checkCollision(playerX + sx, playerZ)) playerX += sx;
         if (!checkCollision(playerX, playerZ + sz)) playerZ += sz;
+    } else {
+        isWalking = false;
     }
+
+    float diff = targetAngle - playerAngle;
+    if (diff > 180.0f)  diff -= 360.0f;
+    if (diff < -180.0f) diff += 360.0f;
+    playerAngle += diff * 0.15f;
+
     handleStairs();
 }
 
@@ -125,16 +121,13 @@ void update(int v) {
     checkItemPickup();
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
-
 }
 
 void init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0.04f, 0.04f, 0.10f, 1.0f); 
-
-
+    glClearColor(0.04f, 0.04f, 0.10f, 1.0f);
     setupLighting();
     initPosters();
     buildPhysicalWorld();
