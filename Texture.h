@@ -30,9 +30,7 @@ void cleanupTextures();
 // axis  = 'Z' (tembok depan, menghadap +Z), 
 //         'z' (tembok belakang, menghadap -Z),
 //         'X' (tembok kiri/kanan, menghadap +/-X)
-void drawPoster(float x, float y, float z,
-                float w, float h,
-                char axis, GLuint texID);
+void drawPoster(float x, float y, float z, float w, float h, char axis, GLuint texID, float alpha = 1.0f);
 
 // Inisialisasi semua texture poster (dipanggil sekali di init())
 void initPosters();

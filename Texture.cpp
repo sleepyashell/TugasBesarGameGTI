@@ -228,49 +228,49 @@ void cleanupTextures() {
 
 void drawPoster(float x, float y, float z,
                 float w, float h,
-                char axis, GLuint texID) {
-    if (texID == 0) return; // texture gagal load, skip
+                char axis, GLuint texID, float alpha) { 
+    if (texID == 0) return;
 
-    // Aktifkan texturing
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texID);
 
-    // Poster tidak butuh lighting penuh agar warna asli terlihat
-    // Gunakan GL_MODULATE agar pencahayaan scene tetap mempengaruhi
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-    // Override material: putih agar warna texture tidak terdistorsi
-    GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    // Jika sedang tembus pandang, matikan lighting sementara seperti pada tembok
+    if (alpha < 1.0f) {
+        glDisable(GL_LIGHTING);
+    }
+
+    GLfloat white[] = { 1.0f, 1.0f, 1.0f, alpha }; // <-- Ubah alpha di sini
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  white);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  white);
-    GLfloat noSpec[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    GLfloat noSpec[] = { 0.0f, 0.0f, 0.0f, alpha }; // <-- Ubah alpha di sini
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, noSpec);
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glColor4f(1.0f, 1.0f, 1.0f, alpha); // <-- Ganti 1.0f paling ujung dengan alpha!
 
     glBegin(GL_QUADS);
     if (axis == 'Z') {
-        // Poster menempel tembok arah Z (menghadap +Z)
-        // Quad di bidang XY
         glTexCoord2f(0, 0); glVertex3f(x,     y,     z);
         glTexCoord2f(1, 0); glVertex3f(x + w, y,     z);
         glTexCoord2f(1, 1); glVertex3f(x + w, y + h, z);
         glTexCoord2f(0, 1); glVertex3f(x,     y + h, z);
     } else if (axis == 'z') {
-        // Poster menempel tembok arah -Z (menghadap -Z, dibalik)
         glTexCoord2f(0, 0); glVertex3f(x,     y,     z);
         glTexCoord2f(0, 1); glVertex3f(x,     y + h, z);
         glTexCoord2f(1, 1); glVertex3f(x + w, y + h, z);
-        glTexCoord2f(1, 0); glVertex3f(x + w, y,     z);
+        glTexCoord2f(1, 1); glVertex3f(x + w, y,     z);
     } else {
-        // Poster menempel tembok arah X (menghadap +X atau -X)
-        // Quad di bidang ZY
         glTexCoord2f(0, 0); glVertex3f(x, y,     z);
         glTexCoord2f(1, 0); glVertex3f(x, y,     z - w);
         glTexCoord2f(1, 1); glVertex3f(x, y + h, z - w);
         glTexCoord2f(0, 1); glVertex3f(x, y + h, z);
     }
     glEnd();
+
+    if (alpha < 1.0f) {
+        glEnable(GL_LIGHTING); // <-- Hidupkan kembali lighting jika tadi dimatikan
+    }
 
     glDisable(GL_TEXTURE_2D);
 }
@@ -283,29 +283,32 @@ void drawPoster(float x, float y, float z,
 
 void drawRoomPosters(int f, int roomIndex) {
     float fy = f * FLOOR_HEIGHT;
-    float py = fy + 1.0f;           // ketinggian poster
+    float py = fy + 1.0f;           
 
-    float pw = 1.5f;                // lebar poster
-    float ph = 2.0f;                // tinggi poster
-    float pz = 0.25f;               // sedikit di depan dinding
+    float pw = 1.5f;                
+    float ph = 2.0f;                
+    float pz = 0.25f;               
 
-    // 4 texture diulang untuk tiap lantai
     GLuint texID = g_posterTex[roomIndex % NUM_POSTERS];
-    if (texID == 0) return;  // skip jika texture gagal load
+    if (texID == 0) return;  
 
-    // Posisi X tengah ruangan
-    float roomX;
-    if (roomIndex < 3) {
-        roomX = roomIndex * 8.0f + 4.0f;   // 4, 12, 20
-    } else {
-        roomX = 40.0f + 4.0f;              // 44
-    }
+    // Hitung posisi batas X ruangan untuk deteksi player
+    float startX = roomIndex * 8.0f;
+    if (roomIndex >= 3) startX = 40.0f; // Sesuai aturan area tangga
+    float roomWidth = 8.0f;
 
-    // Gambar poster di tengah dinding depan ruangan
-    float px = roomX - pw / 2.0f;  // pojok kiri poster
+    // === HITUNG ALPHA SAMA PERSIS DENGAN TEMBOK DEPAN ===
+    bool insideZ   = (playerZ < 0.5f);
+    bool insideX   = (playerX >= startX && playerX <= startX + roomWidth);
+    bool sameFloor = (playerY >= fy && playerY < fy + FLOOR_HEIGHT);
+    float alpha     = (insideZ && insideX && sameFloor) ? 0.25f : 1.0f;
 
-    // Poster menghadap +Z (ke arah koridor/depan gedung)
-    drawPoster(px, py, pz, pw, ph, 'Z', texID);
+    // Tentukan koordinat tengah X untuk meletakkan poster
+    float roomX = startX + 4.0f;
+    float px = roomX - pw / 2.0f;  
+
+    // Oper nilai alpha ke fungsi drawPoster
+    drawPoster(px, py, pz, pw, ph, 'Z', texID, alpha); // <-- Tambah alpha di sini
 }
 
 void drawFloorPosters(int f) {

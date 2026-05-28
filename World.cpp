@@ -100,7 +100,7 @@ void handleStairs() {
     bool  inStair = false;
     float targetY = playerY;
 
-    for (int f = 0; f < NUM_FLOORS; f++) {
+    for (int f = 0; f < NUM_FLOORS - 1; f++) {
         float base   = f * FLOOR_HEIGHT;
         float yStart = base + 0.8f;
         float yBord  = base + 3.2f;
