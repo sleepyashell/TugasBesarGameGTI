@@ -11,7 +11,7 @@
 
 EnemyBot ghostBot;
 
-// Daftar 11 Node Utama Gedung untuk Navigasi Multi-Lantai
+// Daftar 11 Node Utama Gedung untuk Navigasi 
 const int NUM_NODES = 11;
 Waypoint nodes[NUM_NODES] = {
     { 2.0f,  0.0f, 2.0f },   // Node 0: Lantai 1 - Ujung Kiri
@@ -52,7 +52,6 @@ void updateBot() {
     float distanceX = std::abs(playerX - ghostBot.x);
     float distanceZ = std::abs(playerZ - ghostBot.z);
 
-    // Rumus dasar indeks node lantai aktif: Lantai 1 = 0, Lantai 2 = 3, Lantai 3 = 6
     int baseIndex = ghostBot.currentFloor * 3; 
 
     // --- INTERPOLASI VERTIKAL DI TANGGA ---
@@ -69,7 +68,7 @@ void updateBot() {
 
     bool playerInStairArea = (playerZ <= 0.5f && playerX >= 31.0f && playerX <= 37.0f);
 
-    // --- 1. LOGIKA SCANNING VISION & CHASE TRIGGER ---
+    // SCANNING VISION & CHASE TRIGGER ---
     bool canSeePlayer = false;
 
     if (ghostBot.currentFloor == playerFloor && ghostBot.z >= 2.0f && playerZ > 0.5f) {
@@ -86,7 +85,7 @@ void updateBot() {
         canSeePlayer = true;
     }
 
-    // --- 2. TRANSISI STATUS AI (STATE MACHINE ANTI-AMNESIA) ---
+    // TRANSISI STATUS AI
     if (canSeePlayer) {
         ghostBot.isChasing = true;
         ghostBot.isSearching = false;
@@ -106,7 +105,7 @@ void updateBot() {
         }
     }
 
-    // --- 3. EKSEKUSI PERGERAKAN MENGEJAR (CHASE MODE) ---
+    // CHASE MODE
     if (ghostBot.isChasing) {
         // KONDISI A: Satu lantai di koridor utama
         if (ghostBot.currentFloor == playerFloor && ghostBot.z >= 2.0f && playerZ >= 2.0f) {
@@ -122,7 +121,7 @@ void updateBot() {
             if (!checkCollision(ghostBot.x, nextZ)) ghostBot.z = nextZ;
             ghostBot.y = ghostBot.currentFloor * FLOOR_HEIGHT;
         } 
-        // KONDISI B: Beda lantai (Navigasi tangga cerdas tanpa merusak index searching)
+        // KONDISI B: Beda lantai 
         else {
             // Tentukan node gerbang tangga tujuan sementara tanpa meng-override targetNodeIndex utama jika tidak perlu
             int tanggaNodeX = (ghostBot.currentFloor == 0) ? 1 : ((ghostBot.currentFloor == 1) ? 4 : 7);
@@ -161,7 +160,7 @@ void updateBot() {
         return; 
     }
 
-    // --- 4. EKSEKUSI PATROLI NORMAL / SEARCHING DI KORIDOR ---
+    //  PATROLI NORMAL / SEARCHING DI KORIDOR 
     if (ghostBot.z < 2.0f) {
         ghostBot.x = 33.0f; 
         
@@ -232,7 +231,7 @@ void updateBot() {
         }
     }
 
-    // SAKLAR RESET: Mengecek apakah bot sudah sampai di node sasaran (Ujung kiri/kanan/tengah)
+    // Mengecek apakah bot sudah sampai di node sasaran (Ujung kiri/kanan/tengah)
     if (ghostBot.targetNodeIndex != -1) {
         Waypoint currentTarget = nodes[ghostBot.targetNodeIndex];
         if (std::abs(ghostBot.x - currentTarget.x) < 0.4f) {
@@ -244,7 +243,7 @@ void updateBot() {
         }
     }
 
-    // --- PEMICU MASUK TANGGA PINTAR (MENGIKUTI POSISI LANTAI PLAYER) ---
+    // PEMICU MASUK TANGGA 
     if (ghostBot.x >= 32.8f && ghostBot.x <= 33.2f) {
         if (ghostBot.isChasing || ghostBot.isSearching) {
             if (playerFloor > ghostBot.currentFloor && ghostBot.currentFloor < 2) {

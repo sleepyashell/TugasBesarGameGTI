@@ -9,7 +9,7 @@
 #include <fstream>
 #include <assert.h>
 #include "Texture.h"
-#include "World.h"   // NUM_FLOORS, FLOOR_HEIGHT
+#include "World.h"  
 
 
 using namespace std;
@@ -241,13 +241,13 @@ void drawPoster(float x, float y, float z,
         glDisable(GL_LIGHTING);
     }
 
-    GLfloat white[] = { 1.0f, 1.0f, 1.0f, alpha }; // <-- Ubah alpha di sini
+    GLfloat white[] = { 1.0f, 1.0f, 1.0f, alpha }; 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  white);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  white);
-    GLfloat noSpec[] = { 0.0f, 0.0f, 0.0f, alpha }; // <-- Ubah alpha di sini
+    GLfloat noSpec[] = { 0.0f, 0.0f, 0.0f, alpha };
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, noSpec);
 
-    glColor4f(1.0f, 1.0f, 1.0f, alpha); // <-- Ganti 1.0f paling ujung dengan alpha!
+    glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
     glBegin(GL_QUADS);
     if (axis == 'Z') {
@@ -269,7 +269,7 @@ void drawPoster(float x, float y, float z,
     glEnd();
 
     if (alpha < 1.0f) {
-        glEnable(GL_LIGHTING); // <-- Hidupkan kembali lighting jika tadi dimatikan
+        glEnable(GL_LIGHTING);
     }
 
     glDisable(GL_TEXTURE_2D);
@@ -308,7 +308,7 @@ void drawRoomPosters(int f, int roomIndex) {
     float px = roomX - pw / 2.0f;  
 
     // Oper nilai alpha ke fungsi drawPoster
-    drawPoster(px, py, pz, pw, ph, 'Z', texID, alpha); // <-- Tambah alpha di sini
+    drawPoster(px, py, pz, pw, ph, 'Z', texID, alpha);
 }
 
 void drawFloorPosters(int f) {

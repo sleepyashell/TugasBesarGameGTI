@@ -17,7 +17,7 @@ struct EnemyBot {
     float speed;
     float dirX;
     int currentFloor;
-    int targetNodeIndex; // Mengunci indeks node tujuan aktual
+    int targetNodeIndex; 
     bool movingRight;
     bool isChasing;
     bool isSearching;

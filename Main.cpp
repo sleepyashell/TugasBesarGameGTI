@@ -34,44 +34,35 @@ float flickerIntensity = 1.0f;
 
 vector<BoundingBox> colliders;
 
-#include <cstdio> // Pastikan header ini ada untuk fungsi sprintf
+#include <cstdio> 
 
-// Fungsi untuk menggambar teks 2D di layar
 void drawHUDText(float x, float y, const char* text) {
-    // 1. Matikan pencahayaan sementara agar warna teks solid (putih/hijau)
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     
-    // 2. Pindah ke mode Proyeksi Matriks Sementara untuk merender teks 2D
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    // Set koordinat layar 2D (0 sampai 100 secara horizontal dan vertikal)
     gluOrtho2D(0, 100, 0, 100);
     
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
     
-    // 3. Set warna teks (Hijau terang/Lime agar kontras di kegelapan game horor)
     glColor3f(0.0f, 1.0f, 0.0f); 
     
-    // 4. Tentukan posisi teks (x, y) di layar berdasarkan skala Ortho 0-100
     glRasterPos2f(x, y);
     
-    // 5. Gambar karakter teks satu per satu
     while (*text) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *text);
         text++;
     }
     
-    // 6. Kembalikan kondisi matriks OpenGL ke semula (3D Mode)
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     
-    // Hidupkan kembali sistem lighting gedung
     glEnable(GL_LIGHTING);
 }
 
@@ -128,22 +119,15 @@ void display() {
 
     drawPlayer();
     
-    // ==========================================
-    // HUD DEBUG: TAMPILKAN KOORDINAT PLAYER
-    // ==========================================
+    // HUD DEBUG: KOORDINAT PLAYER
     char coordsStr[64];
-    // Ambil data X, Y, Z player dan format menjadi teks string
     sprintf(coordsStr, "PLAYER POS -> X: %.2f  Y: %.2f  Z: %.2f", playerX, playerY, playerZ);
     
-    // Gambar teks di koordinat layar (X=2, Y=95) -> Pojok kiri atas layar
     drawHUDText(2.0f, 95.0f, coordsStr);
-
-    // Tambahan info lantai biar makin gampang mantau bot
-    int currentFloor = (int)(playerY / 4.0f) + 1; // 4.0f adalah FLOOR_HEIGHT kamu
+    int currentFloor = (int)(playerY / 4.0f) + 1; 
     char floorStr[32];
     sprintf(floorStr, "LANTAI: %d", currentFloor);
     drawHUDText(2.0f, 91.0f, floorStr);
-    // ==========================================
 
     glutSwapBuffers();
     
