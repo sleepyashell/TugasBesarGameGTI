@@ -4,21 +4,21 @@
 #include <GL/glut.h>
 #endif
 #include "Building.h"
-#include "Material.h"  // <--- TAMBAHKAN INI (Untuk matFloor, matConcrete, matPillar, dll)
-#include "Drawing.h"   // <--- TAMBAHKAN INI (Untuk fungsi drawBlock)
-#include "World.h"     // <--- TAMBAHKAN INI (Untuk playerX, playerY, NUM_FLOORS, dll)
+#include "Material.h"
+#include "Drawing.h"
+#include "World.h"
 
 // ==========================================
 // MODULE BANGUNAN
 // ==========================================
 
 void drawCorridorInterior(float width, float depth) {
-    matFloor();   drawBlock(width, 0.05f, depth);
+    matFloor();   drawBlock(width, 0.05f, depth);  // lantai koridor Z=4..0
     glPushMatrix();
         glTranslatef(0, 4.0f, 0);
         matFloor();   drawBlock(width, 0.05f, depth);
         glTranslatef(0, 0.05f, 0);
-        matConcrete(); drawBlock(width, 0.95f, depth);
+        matConcrete(); drawBlock(width, 0.95f, depth);  // plafon koridor
     glPopMatrix();
 }
 
@@ -47,7 +47,7 @@ void drawCorridorFront(float width, float floorY) {
     glPushMatrix();
         if (alpha < 1.0f) glColor4f(0.5f, 0.5f, 0.5f, alpha);
         else matPillar();
-        drawBlock(PILLAR_W, 4.0f, 0.4f);
+        drawBlock(PILLAR_W, 4.0f, 0.2f);
     glPopMatrix();
 
     // Tiang tengah
@@ -57,7 +57,7 @@ void drawCorridorFront(float width, float floorY) {
             glTranslatef(x, 0.0f, 0.0f);
             if (alpha < 1.0f) glColor4f(0.5f, 0.5f, 0.5f, alpha);
             else matPillar();
-            drawBlock(PILLAR_W, 4.0f, 0.4f);
+            drawBlock(PILLAR_W, 4.0f, 0.2f);
         glPopMatrix();
     }
 
@@ -66,7 +66,7 @@ void drawCorridorFront(float width, float floorY) {
         glTranslatef(width - PILLAR_W, 0.0f, 0.0f);
         if (alpha < 1.0f) glColor4f(0.5f, 0.5f, 0.5f, alpha);
         else matPillar();
-        drawBlock(PILLAR_W, 4.0f, 0.4f);
+        drawBlock(PILLAR_W, 4.0f, 0.2f);
     glPopMatrix();
 
     if (alpha < 1.0f) {
@@ -75,37 +75,39 @@ void drawCorridorFront(float width, float floorY) {
     }
 }
 
+// Render 1 ruangan - HANYA dinding kanan (dinding kiri = dinding kanan ruangan sebelah)
+// Dinding kiri paling ujung gedung ditambahin manual di drawOneLantai
 void drawRoomInterior(float width, float depth) {
     matFloor();   drawBlock(width, 0.05f, depth);
     drawDeskSet(width, depth);
+
+    // Tembok belakang
     glPushMatrix();
         glTranslatef(0, 0, -depth);
         matConcrete(); drawBlock(width, 4.0f, 0.2f);
     glPopMatrix();
-    matPillar();
-    drawBlock(0.2f, 4.0f, depth);
-    glPushMatrix();
-        glTranslatef(width - 0.2f, 0, 0);
-        drawBlock(0.2f, 4.0f, depth);
-    glPopMatrix();
+
+    // Plafon
     glPushMatrix();
         glTranslatef(0, 4.0f, 0);
         matFloor();    drawBlock(width, 0.05f, depth);
         glTranslatef(0, 0.05f, 0);
         matConcrete(); drawBlock(width, 0.95f, depth);
     glPopMatrix();
+
+    // TIDAK ADA dinding samping - dihandle di drawOneLantai
 }
 
 void drawStairArea(float width, float depth, bool isLastFloor) {
     if (isLastFloor) {
-    	glPushMatrix();
+        glPushMatrix();
             glTranslatef(4, 0, 0);
-        	matFloor();    drawBlock(width, 0.05f, depth);
+            matFloor(); drawBlock(width, 0.05f, depth);
         glPopMatrix();
-        matPillar();   drawBlock(0.2f, 4.0f, depth);
+        // Hanya dinding kanan
         glPushMatrix();
             glTranslatef(width - 0.2f, 0, 0);
-            drawBlock(0.2f, 4.0f, depth);
+            matPillar(); drawBlock(0.2f, 4.0f, depth - 0.2f);
         glPopMatrix();
         glPushMatrix();
             glTranslatef(0, 0, -depth);
@@ -117,21 +119,20 @@ void drawStairArea(float width, float depth, bool isLastFloor) {
             glTranslatef(0, 0.05f, 0);
             matConcrete(); drawBlock(width, 0.95f, depth);
         glPopMatrix();
-        
+
         matFloor(); drawBlock(4.0f, 0.05f, 1.0f);
-        
+
         glPushMatrix();
-	        glTranslatef(0, -10.0f, 0);
-	        matFloor(); drawBlock(width, 0.05f, depth);
+            glTranslatef(0, -10.0f, 0);
+            matFloor(); drawBlock(width, 0.05f, depth);
         glPopMatrix();
         return;
     }
 
-	glPushMatrix();
-            glTranslatef(4, 0, 0);
-        	matFloor();    drawBlock(width, 0.05f, depth);
-        glPopMatrix();
-    
+    glPushMatrix();
+        glTranslatef(4, 0, 0);
+        matFloor(); drawBlock(width, 0.05f, depth);
+    glPopMatrix();
 
     glPushMatrix();
         glTranslatef(0, 0, -depth);
@@ -152,7 +153,6 @@ void drawStairArea(float width, float depth, bool isLastFloor) {
         matStair(); drawBlock(4.0f, 0.2f, 2.0f);
     glPopMatrix();
 
-    // Sisi kanan (X=0..4)
     matFloor(); drawBlock(4.0f, 0.05f, 1.0f);
 
     glPushMatrix();
@@ -258,26 +258,51 @@ void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown) {
     glPushMatrix();
     glTranslatef(0, offsetY, 0);
 
+        // Koridor
         glPushMatrix();
             glTranslatef(0, 0, 4);
             drawCorridorInterior(56, 4);
         glPopMatrix();
 
         glPushMatrix();
+            // Lantai + plafon + tembok belakang semua room sekaligus
             for (int i = 0; i < 4; i++) {
                 drawRoomInterior(8, 10);
                 glTranslatef(8, 0, 0);
             }
             drawStairArea(8, 10, isLastFloor);
-            if (hasStairDown) {
-                drawStairDown();
-            }
+            if (hasStairDown) drawStairDown();
             glTranslatef(8, 0, 0);
             for (int i = 0; i < 2; i++) {
                 drawRoomInterior(8, 10);
                 glTranslatef(8, 0, 0);
             }
         glPopMatrix();
+
+        // Dinding samping: 1 blok panjang, tidak ada overlap sama sekali
+        // Kiri (X=0), dari Z=0 ke Z=-10
+        matPillar();
+        // Kiri
+		glPushMatrix();
+    		glTranslatef(0, 0, -0.01f);
+    		matPillar(); drawBlock(0.2f, 4.0f, 9.99f);
+		glPopMatrix();
+
+		// Kanan
+		glPushMatrix();
+    		glTranslatef(55.8f, 0, -0.01f);
+    		matPillar(); drawBlock(0.2f, 4.0f, 9.99f);
+		glPopMatrix();
+
+        // Sekat antar ruangan: 1 blok per sekat, bukan 2
+        // Posisi sekat di X=8, 16, 24, 40, 48 (skip area tangga X=32..40)
+        float sekatX[] = { 8.0f, 16.0f, 24.0f, 32.0f, 40.0f, 48.0f };
+		for (int i = 0; i < 6; i++) {   // <-- 6 bukan 5
+    		glPushMatrix();
+        		glTranslatef(sekatX[i] - 0.1f, 0, -0.01f);
+        		matPillar(); drawBlock(0.2f, 4.0f, 9.99f);
+    		glPopMatrix();
+		}
 
     glPopMatrix();
 }
