@@ -20,6 +20,11 @@ using namespace std;
 // ==========================================
 // KONSTANTA ITEM
 // ==========================================
+struct SpawnZone {
+    float xMin, xMax, zMin, zMax;
+    bool  isCorridor;
+    int   roomIndex; 
+};
 
 static const float PICKUP_RADIUS     = 1.2f;   // jarak maks pengambilan item
 static const float BOB_AMPLITUDE     = 0.12f;  // amplitudo animasi naik-turun
@@ -57,6 +62,20 @@ static const int SPAWN_COUNTS[NUM_ITEM_TYPES] = {
     2,  // BATTERY   - bonus
 };
 
+static const SpawnZone ALL_ZONES[] = {
+    // Koridor utama
+    { 6.0f,  50.0f,  1.5f,  3.5f,  true,  -1 },
+
+    // Ruangan kiri
+    { 2.0f,   6.0f, -7.0f, -2.5f, false,  0 },   // Room 0: x=0..8
+    {10.0f,  14.0f, -7.0f, -2.5f, false,  1 },   // Room 1: x=8..16
+    {18.0f,  22.0f, -7.0f, -2.5f, false,  2 },   // Room 2: x=16..24
+
+    // Ruangan kanan
+    {42.0f,  46.0f, -7.0f, -2.5f, false,  4 },   // Room 4: x=40..48
+    {50.0f,  53.0f, -7.0f, -2.5f, false,  5 },   // Room 5: x=48..56
+};
+static const int NUM_ALL_ZONES = 6;
 // ==========================================
 // STATE GLOBAL
 // ==========================================
@@ -291,10 +310,7 @@ static void drawItemAura(ItemType type, float bobOffset) {
 // SPAWN LOGIC
 // ==========================================
 
-struct SpawnZone {
-    float xMin, xMax, zMin, zMax;
-    bool  isCorridor;
-};
+
 
 static const SpawnZone SPAWN_ZONES[] = {
     // Koridor utama (lebih aman, dalam area playable)
@@ -316,29 +332,48 @@ static float randf(float lo, float hi) {
     return lo + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * (hi - lo);
 }
 
+// Cek apakah zona spawn valid (tidak di ruangan terkunci)
+static bool isZoneValid(const SpawnZone& zone, int floor) {
+    if (zone.isCorridor) return true; // Koridor selalu valid
+    if (zone.roomIndex < 0) return true;
+    if (zone.roomIndex >= NUM_ROOMS_PER_FLOOR) return true;
+    // Cek apakah ruangan terkunci di lantai ini
+    return !lockedRooms[floor][zone.roomIndex];
+}
+
 static WorldItem spawnItem(ItemType type, int preferredFloor) {
     WorldItem item;
     item.type       = type;
     item.collected  = false;
-    item.bobTimer   = randf(0.0f, 6.28f); // fase awal random agar tidak sync
+    item.bobTimer   = randf(0.0f, 6.28f);
     item.rotAngle   = randf(0.0f, 360.0f);
     item.floor      = preferredFloor;
 
-    // Pilih zona spawn random
-    int  zoneIdx = rand() % NUM_SPAWN_ZONES;
-    const SpawnZone& zone = SPAWN_ZONES[zoneIdx];
+    // Filter zona yang tersedia untuk lantai ini
+    vector<SpawnZone> validZones;
+    
+    for (int i = 0; i < NUM_ALL_ZONES; i++) {
+        if (isZoneValid(ALL_ZONES[i], preferredFloor)) {
+            validZones.push_back(ALL_ZONES[i]);
+        }
+    }
+
+    // Jika tidak ada zona valid (semua ruangan terkunci), fallback ke koridor
+    if (validZones.empty()) {
+        validZones.push_back(ALL_ZONES[0]); // Koridor
+    }
+
+    // Pilih zona spawn random dari yang valid
+    int  zoneIdx = rand() % validZones.size();
+    const SpawnZone& zone = validZones[zoneIdx];
 
     item.x = randf(zone.xMin, zone.xMax);
     item.z = randf(zone.zMin, zone.zMax);
 
-    // Safety margin agar item tidak spawn di luar map / nempel tembok
+    // Safety margin (sama seperti sebelumnya)
     if (item.x < 1.5f) item.x = 1.5f;
     if (item.x > 54.5f) item.x = 54.5f;
-
-    // Area koridor playable
     if (item.z > 3.5f) item.z = 3.5f;
-
-    // Area ruangan playable
     if (item.z < -7.5f) item.z = -7.5f;
 
     item.y = preferredFloor * FLOOR_HEIGHT + ITEM_BASE_HEIGHT;
@@ -382,8 +417,6 @@ void initItems() {
             g_items.push_back(spawnItem((ItemType)t, floor));
         }
     }
-
-    printf("[Item] Spawned %d items total.\n", (int)g_items.size());
 }
 
 void updateItems(float dt) {

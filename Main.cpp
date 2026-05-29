@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 #include <cstdlib>
+#include <ctime>
 
 #include "Material.h"
 #include "World.h"
@@ -33,6 +34,8 @@ float flickerTimer     = 0.0f;
 float flickerIntensity = 1.0f;
 
 vector<BoundingBox> colliders;
+
+bool isDoorOpen = false;
 
 #include <cstdio> 
 
@@ -108,16 +111,19 @@ void display() {
             glTranslatef(0, fy, 4);
             drawCorridorFront(56, fy);
         glPopMatrix();
-        glPushMatrix();
-            glTranslatef(0, fy, 0);
-            drawFrontWall(8, 10,  0, false, fy); glTranslatef(8, 0, 0);
-            drawFrontWall(8, 10,  8, true,  fy); glTranslatef(8, 0, 0);
-            drawFrontWall(8, 10, 16, false, fy); glTranslatef(8, 0, 0);
-            drawFrontWall(8, 10, 24, true,  fy); glTranslatef(16, 0, 0);
-            drawFrontWall(8, 10, 40, false, fy); glTranslatef(8, 0, 0);
-            drawFrontWall(8, 10, 48, false, fy);
-        glPopMatrix();
-    }
+        for (int f = 0; f < NUM_FLOORS; f++) {
+	    float fy = f * FLOOR_HEIGHT;
+	    glPushMatrix();
+	        glTranslatef(0, fy, 0);
+	        drawFrontWall(8, 10,  0, false, fy); glTranslatef(8, 0, 0);
+	        drawFrontWall(8, 10,  8, true,  fy); glTranslatef(8, 0, 0);
+	        drawFrontWall(8, 10, 16, false, fy); glTranslatef(8, 0, 0);
+	        drawFrontWall(8, 10, 24, true,  fy); glTranslatef(16, 0, 0);
+	        drawFrontWall(8, 10, 40, false, fy); glTranslatef(8, 0, 0);
+	        drawFrontWall(8, 10, 48, false, fy);
+	    glPopMatrix();
+		}
+	}
 
     drawPlayer();
     
@@ -132,8 +138,6 @@ void display() {
     drawHUDText(2.0f, 91.0f, floorStr);
     drawItemHUD();
     glutSwapBuffers();
-    
-    
 }
 
 void handleInput() {
@@ -149,8 +153,18 @@ void handleInput() {
         float mag = sqrt(mx * mx + mz * mz);
         float sx  = (mx / mag) * playerSpeed;
         float sz  = (mz / mag) * playerSpeed;
-        if (!checkCollision(playerX + sx, playerZ)) playerX += sx;
-        if (!checkCollision(playerX, playerZ + sz)) playerZ += sz;
+    // Simpan posisi asli sebelum gerakan
+	float origX = playerX;
+	float origZ = playerZ;
+
+	// Coba gerak X dari posisi asli
+	if (!checkCollision(origX + sx, origZ)) {
+    	playerX = origX + sx;
+	}
+	// Coba gerak Z dari posisi asli (bukan dari posisi X yang baru)
+	if (!checkCollision(origX, origZ + sz)) {
+    	playerZ = origZ + sz;
+	}
     } else {
         isWalking = false;
     }
@@ -179,6 +193,15 @@ void init() {
     glClearColor(0.04f, 0.04f, 0.10f, 1.0f);
     setupLighting();
     initPosters();
+    
+    srand(time(0));
+    
+    // Random door state saat game start
+    isDoorOpen = (rand() % 2) == 0;
+    
+    // --- RUANGAN TERKUNCI ---
+    // Generate ruangan yang tidak bisa dimasuki secara random
+    randomizeLockedRooms();
     buildPhysicalWorld();
     initItems();
     initBot();

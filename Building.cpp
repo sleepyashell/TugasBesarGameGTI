@@ -314,3 +314,39 @@ void drawRuangGedung() {
         drawOneLantai(f * FLOOR_HEIGHT, isLastFloor, hasStairDown);
     }
 }
+
+// Gambar rantai/papan kayu yang menandakan pintu terkunci
+void drawLockedDoorMarker(float alpha) {
+    glDisable(GL_LIGHTING);
+    
+    // Warna rantai besi gelap
+    glColor4f(0.15f, 0.15f, 0.18f, alpha);
+    
+    // Rantai horizontal
+    glPushMatrix();
+        glTranslatef(0.5f, 1.2f, 0.08f);
+        drawBlock(1.0f, 0.08f, 0.06f);
+    glPopMatrix();
+    
+    // Rantai vertikal (gembok di tengah)
+    glPushMatrix();
+        glTranslatef(0.9f, 0.8f, 0.08f);
+        drawBlock(0.12f, 0.5f, 0.06f);
+    glPopMatrix();
+    
+    // Gembok
+    glPushMatrix();
+        glTranslatef(0.85f, 1.0f, 0.1f);
+        glColor4f(0.25f, 0.25f, 0.28f, alpha);
+        glutSolidCube(0.15f);
+    glPopMatrix();
+    
+    // Papan merah (tanda terkunci)
+    glColor4f(0.6f, 0.1f, 0.1f, alpha * 0.8f);
+    glPushMatrix();
+        glTranslatef(0.5f, 1.8f, 0.08f);
+        drawBlock(0.8f, 0.15f, 0.04f);
+    glPopMatrix();
+    
+    glEnable(GL_LIGHTING);
+}
