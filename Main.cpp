@@ -94,11 +94,13 @@ void display() {
     }
 
     drawGround();
-    drawTrees();
+    //drawTrees();
     drawRuangGedung();
     drawAllPosters();
     drawItems();
     drawBot();
+    
+    
 
     for (int f = 0; f < NUM_FLOORS; f++) {
         float fy = f * FLOOR_HEIGHT;
@@ -128,7 +130,7 @@ void display() {
     char floorStr[32];
     sprintf(floorStr, "LANTAI: %d", currentFloor);
     drawHUDText(2.0f, 91.0f, floorStr);
-
+    drawItemHUD();
     glutSwapBuffers();
     
     

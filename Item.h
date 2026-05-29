@@ -61,4 +61,6 @@ bool allRequiredItemsCollected();
 // Reset semua item (untuk restart game)
 void resetItems();
 
+void drawItemHUD();
+
 #endif
