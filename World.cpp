@@ -11,6 +11,9 @@
 #include "World.h"
 #include "Building.h"
 #include "Drawing.h"
+
+bool lockedRooms[NUM_FLOORS][NUM_ROOMS_PER_FLOOR] = { {false} };
+
 // ==========================================
 // SETUP LIGHTING
 // ==========================================
@@ -149,6 +152,44 @@ void buildPhysicalWorld() {
         registerCollider(0.0f,  3.9f, 56.0f, 0.2f, yBot, yTop);
         registerCollider(0.0f, -9.8f, 56.0f, 0.2f, yBot, yTop);
 
+        // Pintu utama hanya blokir jika tertutup (isDoorOpen = false)
+        if (!isDoorOpen) {
+            registerCollider(1.0f, 0.0f, 2.0f, 0.2f, yBot, yTop);
+        }
+
+        // --- COLLIDER UNTUK RUANGAN TERKUNCI ---
+        // Daftar posisi pintu untuk setiap ruangan per lantai
+        // Room 0: x=0..8,   door at x=1,  z=0, width=2 (not flipped)
+        // Room 1: x=8..16,  door at x=13, z=0, width=2 (flipped, doorX=5 -> 8+5=13)
+        // Room 2: x=16..24, door at x=17, z=0, width=2 (not flipped)
+        // Room 3: x=24..32, AREA TANGGA - skip
+        // Room 4: x=40..48, door at x=41, z=0, width=2 (not flipped)
+        // Room 5: x=48..56, door at x=49, z=0, width=2 (not flipped)
+
+        struct DoorInfo {
+            float x;
+            float z;
+            float w;
+            float d;
+        };
+
+        DoorInfo roomDoors[NUM_ROOMS_PER_FLOOR] = {
+            { 1.0f,  0.0f, 2.0f, 0.2f },  // Room 0
+            { 13.0f, 0.0f, 2.0f, 0.2f },  // Room 1 (flipped: 8+5=13)
+            { 17.0f, 0.0f, 2.0f, 0.2f },  // Room 2
+            { 0.0f,  0.0f, 0.0f, 0.0f },  // Room 3 - tangga, no door
+            { 41.0f, 0.0f, 2.0f, 0.2f },  // Room 4
+            { 49.0f, 0.0f, 2.0f, 0.2f },  // Room 5
+        };
+
+        for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
+            if (lockedRooms[f][r]) {
+                // Tambahkan collider di pintu ruangan terkunci
+                registerCollider(roomDoors[r].x, roomDoors[r].z, 
+                                roomDoors[r].w, roomDoors[r].d, yBot, yTop);
+            }
+        }
+
         for (int i = 0; i < 4; i++) {
             float sx = i * 8.0f;
             registerCollider(sx, 0.0f, 0.2f, 10.0f, yBot, yTop);
@@ -171,6 +212,62 @@ void buildPhysicalWorld() {
                 registerCollider(sx,        0.0f, 5.0f, 0.2f, yBot, yTop);
                 registerCollider(sx + 7.0f, 0.0f, 1.0f, 0.2f, yBot, yTop);
             }
+        }
+        
+        // --- COLLIDER UNTUK MEJA ---
+        // Setiap ruangan memiliki 9 meja (3x3 grid)
+        // Meja tidak ada di area tangga (room 3)
+        float deskSpacingX = (8.0f - 0.4f) / 3.0f;  // 2.5333
+        float deskSpacingZ = (10.0f - 2.5f) / 3.0f; // 2.5
+        float deskStartX = 0.5f;
+        float deskStartZ = -1.8f;
+        float deskW = 1.4f;   // lebar meja
+        float deskD = 0.7f;   // kedalaman meja
+        float deskH = 0.8f;   // tinggi collider meja (dari lantai)
+        
+        float roomStarts[NUM_ROOMS_PER_FLOOR] = {0.0f, 8.0f, 16.0f, 24.0f, 40.0f, 48.0f};
+        
+        for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
+            if (r == 3) continue; // Skip area tangga
+            
+            float roomBaseX = roomStarts[r];
+            
+            for (int col = 0; col < 3; col++) {
+                for (int row = 0; row < 3; row++) {
+                    float deskX = roomBaseX + deskStartX + col * deskSpacingX;
+                    float deskZ = deskStartZ - row * deskSpacingZ;
+                    
+                    // Register collider untuk meja
+                    registerCollider(deskX, deskZ, deskW, deskD, yBot, yBot + deskH);
+                }
+            }
+        }
+    }
+}
+
+void randomizeLockedRooms() {
+    // Reset semua ruangan ke tidak terkunci
+    for (int f = 0; f < NUM_FLOORS; f++) {
+        for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
+            lockedRooms[f][r] = false;
+        }
+    }
+
+    // Untuk setiap lantai, random 1-2 ruangan yang terkunci
+    // Hindari area tangga (ruangan index 3)
+    for (int f = 0; f < NUM_FLOORS; f++) {
+        int numLocked = 1 + (rand() % 2); // 1 atau 2 ruangan terkunci per lantai
+        int lockedCount = 0;
+        int attempts = 0;
+        
+        while (lockedCount < numLocked && attempts < 100) {
+            int room = rand() % NUM_ROOMS_PER_FLOOR;
+            // Skip area tangga (index 3) dan ruangan yang sudah terkunci
+            if (room != 3 && !lockedRooms[f][room]) {
+                lockedRooms[f][room] = true;
+                lockedCount++;
+            }
+            attempts++;
         }
     }
 }

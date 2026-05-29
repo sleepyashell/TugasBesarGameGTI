@@ -278,3 +278,4 @@ void drawBot() {
         glDisable(GL_COLOR_MATERIAL);
     glPopMatrix();
 }
+
