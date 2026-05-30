@@ -6,7 +6,7 @@
 
 #include <cstdlib> 
 #include <cmath>    
-#include "bot.h"
+#include "Bot.h"
 #include "World.h" 
 
 EnemyBot ghostBot;
