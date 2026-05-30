@@ -80,7 +80,7 @@ void buildPhysicalWorld() {
         float yTop = yBot + FLOOR_HEIGHT;
 
         registerCollider(0.0f,  3.9f, 52.0f, 0.2f, yBot, yTop);
-        registerCollider(0.0f, -6.5f, 52.0f, 0.2f, yBot, yTop);
+        registerCollider(0.0f, -10.0f, 52.0f, 0.2f, yBot, yTop);
 
         // Pintu utama hanya blokir jika tertutup (isDoorOpen = false)
         if (!isDoorOpen) {
@@ -201,6 +201,16 @@ void randomizeLockedRooms() {
                 lockedCount++;
             }
             attempts++;
+        }
+    }
+
+    for (int floor = 0; floor < NUM_FLOORS; floor++) {
+        for (int room = 0; room < NUM_ROOMS_PER_FLOOR; room++) {
+            if (lockedRooms[floor][room]) {
+            printf("[LOCKED] floor=%d room=%d\n",
+                   floor,
+                   room);
+         }
         }
     }
 }

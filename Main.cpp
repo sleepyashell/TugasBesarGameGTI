@@ -76,9 +76,11 @@ void display() {
  	handleAllLighting();
 
     drawGround();
-    // drawTrees();
+    //// drawTrees();
     drawItems();
     drawBot();
+    
+    
     drawPlayer();
     drawRuangGedung();
     drawAllPosters();
@@ -92,7 +94,7 @@ void display() {
     char floorStr[32];
     sprintf(floorStr, "LANTAI: %d", currentFloor);
     drawHUDText(2.0f, 91.0f, floorStr);
-
+    drawItemHUD();
     glutSwapBuffers();
 }
 
