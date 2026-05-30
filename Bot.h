@@ -25,9 +25,17 @@ struct EnemyBot {
 
 extern EnemyBot ghostBot;
 
+// Fungsi Utama
 void initBot();
 void updateBot();
 void drawBot();
 
-#endif
+// Fungsi Modularisasi State AI (Helper)
+void handleStairInterpolation();
+bool scanForPlayer();
+void executeChaseMode(int playerFloor);
+void executeStairPatrol();
+void executeCorridorPatrol(int baseIndex);
+void checkStairTrigger(int playerFloor, int baseIndex);
 
+#endif

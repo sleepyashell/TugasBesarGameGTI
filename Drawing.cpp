@@ -6,6 +6,8 @@
 
 #include "Drawing.h"
 #include "Material.h"
+#include "World.h"
+
 // ==========================================
 // RENDERING HELPERS
 // ==========================================
