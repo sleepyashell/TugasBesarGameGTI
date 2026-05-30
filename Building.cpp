@@ -29,12 +29,25 @@ void drawCorridorFront(float width, float floorY) {
 	
 	// Pojok Kiri
 	glPushMatrix();
+<<<<<<< Updated upstream
 		glEnable(GL_LIGHTING);
         glDepthMask(GL_TRUE);
+=======
+>>>>>>> Stashed changes
 		matConcrete();
         drawBlock(0.2f, 1.0f, 4.0f);
     glPopMatrix();
     
+<<<<<<< Updated upstream
+=======
+    // Pojok Kanan
+    glPushMatrix();
+    	glTranslatef(51.8f, 0.0f, 0.0f);
+        matConcrete();
+        drawBlock(0.2f, 1.0f, 4.0f);
+    glPopMatrix();
+    
+>>>>>>> Stashed changes
     // Balok depan
     glPushMatrix();
         glTranslatef(0.0f, 0.0f, -0.1f);
@@ -43,6 +56,7 @@ void drawCorridorFront(float width, float floorY) {
         drawBlock(width, 1.0f, 0.2f);
     glPopMatrix();
     
+<<<<<<< Updated upstream
     // Pojok Kanan
     glPushMatrix();
     	glEnable(GL_LIGHTING);
@@ -51,6 +65,9 @@ void drawCorridorFront(float width, float floorY) {
         matConcrete();
         drawBlock(0.2f, 1.0f, 4.0f);
     glPopMatrix();
+=======
+
+>>>>>>> Stashed changes
     
 
     const float SEGMENT  = 8.0f;
