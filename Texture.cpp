@@ -298,10 +298,10 @@ void drawRoomPosters(int f, int roomIndex) {
     float roomWidth = 8.0f;
 
     // === HITUNG ALPHA SAMA PERSIS DENGAN TEMBOK DEPAN ===
-    bool insideZ   = (playerZ < 0.5f);
+    bool insideZ   = (playerZ < 0.0f);
     bool insideX   = (playerX >= startX && playerX <= startX + roomWidth);
     bool sameFloor = (playerY >= fy && playerY < fy + FLOOR_HEIGHT);
-    float alpha     = (insideZ && insideX && sameFloor) ? 0.25f : 1.0f;
+    float alpha     = (insideZ && insideX && sameFloor) ? 0.05f : 1.0f;
 
     // Tentukan koordinat tengah X untuk meletakkan poster
     float roomX = startX + 4.0f;

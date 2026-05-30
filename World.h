@@ -3,23 +3,19 @@
 
 #include <vector>
 
-// 1. Pindahkan Konstanta ke sini agar bisa dibaca semua file
 const float FLOOR_HEIGHT = 5.0f;
 const int NUM_FLOORS = 3;
 
-// 2. Pindahkan Struct BoundingBox ke sini
 struct BoundingBox {
     float xMin, xMax, zMin, zMax, yMin, yMax;
 };
 
-// 3. Deklarasikan 'extern' supaya World.cpp tahu variabel ini ada di Main.cpp
 extern float playerX;
 extern float playerY;
 extern float playerZ;
 extern float pRadius;
 extern std::vector<BoundingBox> colliders;
 extern bool isDoorOpen;
-// Jumlah ruangan per lantai (0..5, indeks 3 adalah area tangga)
 const int NUM_ROOMS_PER_FLOOR = 6;
 
 // --- RUANGAN TERKUNCI ---

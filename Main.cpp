@@ -6,7 +6,8 @@
 #include <cmath>
 #include <vector>
 #include <cstdlib>
-#include <ctime>
+#include <ctime>	
+#include <cstdio> 
 
 #include "Material.h"
 #include "World.h"
@@ -16,10 +17,12 @@
 #include "Item.h"
 #include "Player.h"
 #include "Bot.h"
+#include "Input.h"
+#include "Camera.h"
+#include "Lighting.h"
 
 using namespace std;
 
-bool keys[256];
 float playerX      = 33.0f;
 float playerY      = 0.8f;
 float playerZ      = 2.0f;
@@ -30,14 +33,10 @@ float targetAngle  = 0.0f;
 float walkTimer    = 0.0f;
 bool  isWalking    = false;
 
-float flickerTimer     = 0.0f;
-float flickerIntensity = 1.0f;
-
 vector<BoundingBox> colliders;
 
 bool isDoorOpen = false;
 
-#include <cstdio> 
 
 void drawHUDText(float x, float y, const char* text) {
     glDisable(GL_LIGHTING);
@@ -73,57 +72,16 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(playerX, playerY + 1.2f, playerZ + 12.0f,
-              playerX, playerY + 0.5f, playerZ,
-              0.0f, 1.0f, 0.0f);
-
-    flickerTimer += 0.05f;
-    flickerIntensity = 0.75f
-        + 0.15f * sinf(flickerTimer * 7.3f)
-        + 0.08f * sinf(flickerTimer * 23.1f)
-        + 0.04f * sinf(flickerTimer * 57.9f);
-    if (flickerIntensity < 0.0f) flickerIntensity = 0.0f;
-
-    updateLightPositions();
-
-    GLenum ptLights[] = { GL_LIGHT2, GL_LIGHT3, GL_LIGHT4 };
-    for (int f = 0; f < NUM_FLOORS; f++) {
-        GLfloat pt_diff[] = {
-            0.75f * flickerIntensity,
-            0.68f * flickerIntensity,
-            0.35f * flickerIntensity, 1.0f
-        };
-        glLightfv(ptLights[f], GL_DIFFUSE, pt_diff);
-    }
+	setupCamera();
+ 	handleAllLighting();
 
     drawGround();
-    drawTrees();
-    drawRuangGedung();
-    drawAllPosters();
+    // drawTrees();
     drawItems();
     drawBot();
-
-    for (int f = 0; f < NUM_FLOORS; f++) {
-        float fy = f * FLOOR_HEIGHT;
-        glPushMatrix();
-            glTranslatef(0, fy, 4);
-            drawCorridorFront(56, fy);
-        glPopMatrix();
-        for (int f = 0; f < NUM_FLOORS; f++) {
-	    float fy = f * FLOOR_HEIGHT;
-	    glPushMatrix();
-	        glTranslatef(0, fy, 0);
-	        drawFrontWall(8, 10,  0, false, fy); glTranslatef(8, 0, 0);
-	        drawFrontWall(8, 10,  8, true,  fy); glTranslatef(8, 0, 0);
-	        drawFrontWall(8, 10, 16, false, fy); glTranslatef(8, 0, 0);
-	        drawFrontWall(8, 10, 24, true,  fy); glTranslatef(16, 0, 0);
-	        drawFrontWall(8, 10, 40, false, fy); glTranslatef(8, 0, 0);
-	        drawFrontWall(8, 10, 48, false, fy);
-	    glPopMatrix();
-		}
-	}
-
     drawPlayer();
+    drawRuangGedung();
+    drawAllPosters();
     
     // HUD DEBUG: KOORDINAT PLAYER
     char coordsStr[64];
@@ -138,45 +96,9 @@ void display() {
     glutSwapBuffers();
 }
 
-void handleInput() {
-    float mx = 0, mz = 0;
-    if (keys['w'] || keys['W']) mz -= 1;
-    if (keys['s'] || keys['S']) mz += 1;
-    if (keys['a'] || keys['A']) mx -= 1;
-    if (keys['d'] || keys['D']) mx += 1;
-    if (abs(mx) + abs(mz) > 0) {
-        isWalking = true;
-        walkTimer += 0.15f;
-        targetAngle = atan2f(mx, mz) * 180.0f / 3.14159f;
-        float mag = sqrt(mx * mx + mz * mz);
-        float sx  = (mx / mag) * playerSpeed;
-        float sz  = (mz / mag) * playerSpeed;
-    // Simpan posisi asli sebelum gerakan
-	float origX = playerX;
-	float origZ = playerZ;
-
-	// Coba gerak X dari posisi asli
-	if (!checkCollision(origX + sx, origZ)) {
-    	playerX = origX + sx;
-	}
-	// Coba gerak Z dari posisi asli (bukan dari posisi X yang baru)
-	if (!checkCollision(origX, origZ + sz)) {
-    	playerZ = origZ + sz;
-	}
-    } else {
-        isWalking = false;
-    }
-
-    float diff = targetAngle - playerAngle;
-    if (diff > 180.0f)  diff -= 360.0f;
-    if (diff < -180.0f) diff += 360.0f;
-    playerAngle += diff * 0.15f;
-
-    handleStairs();
-}
 
 void update(int v) {
-    handleInput();
+    handleAllInput();
     updateItems(0.016f);
     checkItemPickup();
     glutPostRedisplay();
@@ -197,6 +119,8 @@ void init() {
     // Random door state saat game start
     isDoorOpen = (rand() % 2) == 0;
     
+    glutIgnoreKeyRepeat(1);
+    
     // --- RUANGAN TERKUNCI ---
     // Generate ruangan yang tidak bisa dimasuki secara random
     randomizeLockedRooms();
@@ -205,8 +129,6 @@ void init() {
     initBot();
 }
 
-void keyPressed(unsigned char k, int x, int y) { keys[k] = true; }
-void keyUp(unsigned char k, int x, int y)      { keys[k] = false; }
 
 void reshape(int w, int h) {
     glViewport(0, 0, w, h);
@@ -224,8 +146,8 @@ int main(int argc, char** argv) {
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyPressed);
-    glutKeyboardUpFunc(keyUp);
+    glutKeyboardFunc(pressNormalKeys);   
+    glutKeyboardUpFunc(releaseNormalKeys);
     glutTimerFunc(16, update, 0);
     glutMainLoop();
     return 0;

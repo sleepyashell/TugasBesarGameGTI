@@ -14,76 +14,6 @@
 
 bool lockedRooms[NUM_FLOORS][NUM_ROOMS_PER_FLOOR] = { {false} };
 
-// ==========================================
-// SETUP LIGHTING
-// ==========================================
-
-void setupLighting() {
-    glEnable(GL_LIGHTING);
-    glEnable(GL_NORMALIZE);
-    glShadeModel(GL_SMOOTH);
-
-    // --- Cahaya 0: Bulan  ---
-    GLfloat moon_pos[]  = { 0.4f, 1.0f, 0.3f, 0.0f };
-    GLfloat moon_diff[] = { 0.28f, 0.32f, 0.42f, 1.0f }; 
-    GLfloat moon_spec[] = { 0.18f, 0.20f, 0.28f, 1.0f };
-    GLfloat moon_amb[]  = { 0.0f,  0.0f,  0.0f,  1.0f };
-    glLightfv(GL_LIGHT0, GL_POSITION, moon_pos);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  moon_diff);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, moon_spec);
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  moon_amb);
-    glEnable(GL_LIGHT0);
-
-    // --- Cahaya 1: Pantulan Ground  ---
-    GLfloat gnd_pos[]  = { 0.0f, -1.0f, 0.0f, 0.0f };
-    GLfloat gnd_diff[] = { 0.12f, 0.05f, 0.04f, 1.0f };
-    GLfloat gnd_spec[] = { 0.0f,  0.0f,  0.0f,  1.0f };
-    GLfloat gnd_amb[]  = { 0.0f,  0.0f,  0.0f,  1.0f };
-    glLightfv(GL_LIGHT1, GL_POSITION, gnd_pos);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE,  gnd_diff);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, gnd_spec);
-    glLightfv(GL_LIGHT1, GL_AMBIENT,  gnd_amb);
-    glEnable(GL_LIGHT1);
-
-    // --- Global ambient ---
-    GLfloat global_amb[] = { 0.10f, 0.10f, 0.13f, 1.0f };
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_amb);
-    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-
-    // --- Cahaya 2 ... : Lampu flickering di koridor ---
-    GLenum ptLights[] = { GL_LIGHT2, GL_LIGHT3, GL_LIGHT4 };
-    for (int f = 0; f < NUM_FLOORS; f++) {
-        float fy = f * FLOOR_HEIGHT + 3.5f;
-        GLfloat pt_pos[]  = { 28.0f, fy, 6.5f, 1.0f };
-        GLfloat pt_diff[] = { 0.75f, 0.68f, 0.35f, 1.0f }; 
-        GLfloat pt_spec[] = { 0.30f, 0.25f, 0.10f, 1.0f };
-        GLfloat pt_amb[]  = { 0.0f,  0.0f,  0.0f,  1.0f };
-        glLightfv(ptLights[f], GL_POSITION, pt_pos);
-        glLightfv(ptLights[f], GL_DIFFUSE,  pt_diff);
-        glLightfv(ptLights[f], GL_SPECULAR, pt_spec);
-        glLightfv(ptLights[f], GL_AMBIENT,  pt_amb);
-        glLightf (ptLights[f], GL_CONSTANT_ATTENUATION,  0.7f);
-        glLightf (ptLights[f], GL_LINEAR_ATTENUATION,    0.08f);
-        glLightf (ptLights[f], GL_QUADRATIC_ATTENUATION, 0.010f);
-        glEnable (ptLights[f]);
-    }
-}
-
-// Setel ulang posisi light yang world-space setiap frame 
-void updateLightPositions() {
-    GLfloat moon_pos[] = { 0.4f, 1.0f, 0.3f, 0.0f };
-    glLightfv(GL_LIGHT0, GL_POSITION, moon_pos);
-    GLfloat gnd_pos[] = { 0.0f, -1.0f, 0.0f, 0.0f };
-    glLightfv(GL_LIGHT1, GL_POSITION, gnd_pos);
-
-    GLenum ptLights[] = { GL_LIGHT2, GL_LIGHT3, GL_LIGHT4 };
-    for (int f = 0; f < NUM_FLOORS; f++) {
-        float fy = f * FLOOR_HEIGHT + 3.5f;
-        GLfloat pt_pos[] = { 28.0f, fy, 6.5f, 1.0f };
-        glLightfv(ptLights[f], GL_POSITION, pt_pos);
-    }
-}
-
 void registerCollider(float x, float z, float w, float d,
                       float yMin, float yMax) {
     BoundingBox b;
@@ -149,8 +79,8 @@ void buildPhysicalWorld() {
         float yBot = f * FLOOR_HEIGHT;
         float yTop = yBot + FLOOR_HEIGHT;
 
-        registerCollider(0.0f,  3.9f, 56.0f, 0.2f, yBot, yTop);
-        registerCollider(0.0f, -9.8f, 56.0f, 0.2f, yBot, yTop);
+        registerCollider(0.0f,  3.9f, 52.0f, 0.2f, yBot, yTop);
+        registerCollider(0.0f, -6.5f, 52.0f, 0.2f, yBot, yTop);
 
         // Pintu utama hanya blokir jika tertutup (isDoorOpen = false)
         if (!isDoorOpen) {
@@ -177,9 +107,10 @@ void buildPhysicalWorld() {
             { 1.0f,  0.0f, 2.0f, 0.2f },  // Room 0
             { 13.0f, 0.0f, 2.0f, 0.2f },  // Room 1 (flipped: 8+5=13)
             { 17.0f, 0.0f, 2.0f, 0.2f },  // Room 2
-            { 0.0f,  0.0f, 0.0f, 0.0f },  // Room 3 - tangga, no door
-            { 41.0f, 0.0f, 2.0f, 0.2f },  // Room 4
-            { 49.0f, 0.0f, 2.0f, 0.2f },  // Room 5
+//            { 29.0f,  0.0f, 2.0f, 0.2f },  // Room 3
+            { 0.0f,  0.0f, 0.0f, 0.0f },  // Room 4, Tangga
+            { 37.0f, 0.0f, 2.0f, 0.2f },  // Room 5
+            { 45.0f, 0.0f, 2.0f, 0.2f },  // Room 6
         };
 
         for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
@@ -203,15 +134,18 @@ void buildPhysicalWorld() {
         }
 
         for (int i = 5; i <= 6; i++) {
-            float sx = (i - 1) * 8.0f + 8.0f;
+            float sx = (i - 1) * 8.0f + 4.0f;
             registerCollider(sx, 0.0f, 0.2f, 10.0f, yBot, yTop);
-            if (i == 5) {
-                registerCollider(sx,        0.0f, 1.0f, 0.2f, yBot, yTop);
-                registerCollider(sx + 3.0f, 0.0f, 5.0f, 0.2f, yBot, yTop);
-            } else {
-                registerCollider(sx,        0.0f, 5.0f, 0.2f, yBot, yTop);
-                registerCollider(sx + 7.0f, 0.0f, 1.0f, 0.2f, yBot, yTop);
-            }
+//            if (i == 5) {
+//                registerCollider(sx,        0.0f, 1.0f, 0.2f, yBot, yTop);
+//                registerCollider(sx + 3.0f, 0.0f, 5.0f, 0.2f, yBot, yTop);
+//            } else {
+//                registerCollider(sx,        0.0f, 5.0f, 0.2f, yBot, yTop);
+//                registerCollider(sx + 7.0f, 0.0f, 1.0f, 0.2f, yBot, yTop);
+//            }
+            registerCollider(sx,        0.0f, 1.0f, 0.2f, yBot, yTop);
+            registerCollider(sx + 3.0f, 0.0f, 5.0f, 0.2f, yBot, yTop);
+            
         }
         
         // --- COLLIDER UNTUK MEJA ---
@@ -225,10 +159,9 @@ void buildPhysicalWorld() {
         float deskD = 0.7f;   // kedalaman meja
         float deskH = 0.8f;   // tinggi collider meja (dari lantai)
         
-        float roomStarts[NUM_ROOMS_PER_FLOOR] = {0.0f, 8.0f, 16.0f, 24.0f, 40.0f, 48.0f};
+        float roomStarts[NUM_ROOMS_PER_FLOOR] = {0.0f, 8.0f, 16.0f, 24.0f, 36.0f, 44.0f};
         
         for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
-            if (r == 3) continue; // Skip area tangga
             
             float roomBaseX = roomStarts[r];
             
