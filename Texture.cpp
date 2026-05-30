@@ -14,6 +14,9 @@
 
 using namespace std;
 
+static GLuint g_textures[NUM_TEXTURES] = {0};
+static bool g_textureBound = false;
+
 // Kelas Image untuk menyimpan data pixel
 class Image {
 public:
@@ -220,9 +223,6 @@ void initPosters() {
     }
 }
 
-void cleanupTextures() {
-    glDeleteTextures(NUM_POSTERS, g_posterTex);
-}
 
 // POSTER RENDERER
 
@@ -294,7 +294,7 @@ void drawRoomPosters(int f, int roomIndex) {
 
     // Hitung posisi batas X ruangan untuk deteksi player
     float startX = roomIndex * 8.0f;
-    if (roomIndex >= 3) startX = 40.0f; // Sesuai aturan area tangga
+    if (roomIndex >= 3) startX = 37.0f; // Sesuai aturan area tangga
     float roomWidth = 8.0f;
 
     // === HITUNG ALPHA SAMA PERSIS DENGAN TEMBOK DEPAN ===
@@ -323,3 +323,49 @@ void drawAllPosters() {
         drawFloorPosters(f);
     }
 }
+
+void initTextures() {
+    
+    // Load texture ubin lantai
+    g_textures[TEX_FLOOR_TILE] = loadBMP("floor_title.bmp");
+    
+    // Load texture poster
+    g_textures[TEX_POSTER_1] = loadBMP("poster1.bmp");
+    g_textures[TEX_POSTER_2] = loadBMP("poster2.bmp");
+    g_textures[TEX_POSTER_3] = loadBMP("poster3.bmp");
+    g_textures[TEX_POSTER_4] = loadBMP("poster4.bmp");
+}
+
+void bindTexture(TextureID texID) {
+    if (texID >= 0 && texID < NUM_TEXTURES && g_textures[texID] != 0) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, g_textures[texID]);
+        
+        // Pastikan texture parameter benar
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        
+        g_textureBound = true;
+        printf("[Texture] Bound: ID=%u\n", g_textures[texID]);
+    } else {
+        printf("[Texture] ERROR: Cannot bind texture %d (ID=%u)\n", texID, 
+               (texID >= 0 && texID < NUM_TEXTURES) ? g_textures[texID] : 999);
+    }
+}
+
+void unbindTexture() {
+    if (g_textureBound) {
+        glDisable(GL_TEXTURE_2D);
+        g_textureBound = false;
+    }
+}
+
+void cleanupTextures() {
+    glDeleteTextures(NUM_TEXTURES, g_textures);
+    for (int i = 0; i < NUM_TEXTURES; i++) {
+        g_textures[i] = 0;
+    }
+}
+
