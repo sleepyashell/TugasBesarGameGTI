@@ -25,7 +25,7 @@ static const float PICKUP_RADIUS     = 1.2f;   // jarak maks pengambilan item
 static const float BOB_AMPLITUDE     = 0.12f;  // amplitudo animasi naik-turun
 static const float BOB_SPEED         = 2.0f;   // kecepatan bobbing 
 static const float ROT_SPEED         = 90.0f;  // kecepatan rotasi
-static const float ITEM_BASE_HEIGHT  = 0.9f;   // tinggi default item di atas lantai
+static const float ITEM_BASE_HEIGHT  = 1.2f;   // tinggi default item di atas lantai
 
 // ==========================================
 // DATA ITEM (nama, deskripsi, wajib/tidak)
@@ -396,12 +396,15 @@ struct RoomZone {
 };
 
 static const RoomZone ROOM_ZONES[ROOMS_PER_FLOOR] = {
-    {  0.8f,  7.2f, -9.0f, -1.0f },  // Room 0: X=0..8, Z=-10..-0 dengan margin
-    {  8.8f, 15.2f, -9.0f, -1.0f },  // Room 1: X=8..16
-    { 16.8f, 23.2f, -9.0f, -1.0f },  // Room 2: X=16..24
-    { 24.8f, 31.2f, -9.0f, -1.0f },  // Room 3: X=24..32
-    { 40.8f, 47.2f, -9.0f, -1.0f },  // Room 4: X=40..48
-    { 48.8f, 50.2f, -9.0f, -1.0f },  // Room 5: X=48..56
+    {  1.5f,  6.5f, -8.5f, -2.0f },  // Room 0 (0..8)
+    {  9.5f, 14.5f, -8.5f, -2.0f },  // Room 1 (8..16)
+    { 17.5f, 22.5f, -8.5f, -2.0f },  // Room 2 (16..24)
+
+    // Area tangga (24..36)
+    { 25.5f, 30.5f, -8.5f, -2.0f },  // Room 3 - tidak dipakai
+
+    { 37.5f, 42.5f, -8.5f, -2.0f },  // Room 4 (36..44)
+    { 45.5f, 50.5f, -8.5f, -2.0f },  // Room 5 (44..52)
 };
 
 // Random float dalam range [lo, hi]
@@ -418,12 +421,17 @@ static WorldItem spawnItemInRoom(ItemType type, int floor, int roomIndex) {
     item.rotAngle  = randf(0.0f, 360.0f);
     item.floor     = floor;
 
-    // Gunakan 4.0f untuk Y position - ini adalah actual visual floor height dari Building.cpp
-    // (FLOOR_HEIGHT = 5.0f adalah world spacing, bukan building height)
     const RoomZone& room = ROOM_ZONES[roomIndex];
+    // Spawn di area aman bagian tengah ruangan
     item.x = randf(room.xMin, room.xMax);
     item.z = randf(room.zMin, room.zMax);
-    item.y = floor * 4.0f + ITEM_BASE_HEIGHT;
+
+    // Hindari dekat pintu depan
+    if (item.z > -2.5f)
+        item.z = -2.5f;
+
+    // Posisi item mengikuti tinggi lantai dunia yang dipakai Building/World
+    item.y = floor * FLOOR_HEIGHT + ITEM_BASE_HEIGHT;
 
     printf("[DEBUG] Item spawn: type=%d, floor=%d, room=%d -> X=%.1f Y=%.1f Z=%.1f\n",
            type, floor, roomIndex, item.x, item.y, item.z);
@@ -435,6 +443,7 @@ static WorldItem spawnItemInRoom(ItemType type, int floor, int roomIndex) {
 // IMPLEMENTASI API PUBLIK
 // ==========================================
 
+
 void initItems() {
     if (!g_initialized) {
         srand((unsigned int)time(NULL));
@@ -442,86 +451,164 @@ void initItems() {
     }
 
     g_items.clear();
-    for (int t = 0; t < NUM_ITEM_TYPES; t++) g_inventory[t] = 0;
-    g_pickupMsg[0]   = '\0';
+
+    for (int t = 0; t < NUM_ITEM_TYPES; t++)
+        g_inventory[t] = 0;
+
+    g_pickupMsg[0] = ' ';
     g_pickupMsgTimer = 0.0f;
 
-    // Total slot: 6 ruangan x 3 lantai = 18 slot
-    // Total item di-spawn: 1+1+3+2+2 = 9, jauh < 18 -> aman max 1 per ruangan
-    const int TOTAL_ROOMS = ROOMS_PER_FLOOR * NUM_FLOORS; // 18
+    int slots[NUM_FLOORS * NUM_ROOMS_PER_FLOOR];
+    int availableSlots = 0;
 
-    // Acak urutan semua slot (Fisher-Yates) agar posisi item bervariasi tiap reset
-    int slots[18];
-    for (int i = 0; i < TOTAL_ROOMS; i++) slots[i] = i;
-    for (int i = TOTAL_ROOMS - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        int tmp = slots[i]; slots[i] = slots[j]; slots[j] = tmp;
+    for (int floor = 0; floor < NUM_FLOORS; floor++) {
+        for (int room = 0; room < NUM_ROOMS_PER_FLOOR; room++) {
+            printf("[ROOM CHECK] floor=%d room=%d locked=%d\n",
+            floor,
+            room,
+            (int)lockedRooms[floor][room]);
+
+            if (room == 3)
+                continue;
+
+            if (lockedRooms[floor][room])
+                continue;
+
+            slots[availableSlots++] =
+                floor * NUM_ROOMS_PER_FLOOR + room;
+        }
     }
 
-    // Kumpulkan request spawn beserta constraint lantai
-    struct SpawnRequest { ItemType type; int preferredFloor; };
+    printf("[Item] Available rooms: %d", availableSlots);
+
+    const int REQUIRED_ITEM_COUNT = 5;
+
+    if (availableSlots < REQUIRED_ITEM_COUNT) {
+        printf("[Item] ERROR: Tidak cukup ruangan terbuka!");
+        return;
+    }
+
+    for (int i = availableSlots - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+
+        int tmp = slots[i];
+        slots[i] = slots[j];
+        slots[j] = tmp;
+    }
+
+    bool slotUsed[NUM_FLOORS * NUM_ROOMS_PER_FLOOR] = { false };
+
+    struct SpawnRequest {
+        ItemType type;
+        int preferredFloor;
+    };
+
     SpawnRequest requests[32];
     int reqCount = 0;
-    for (int t = 0; t < NUM_ITEM_TYPES; t++) {
-        for (int n = 0; n < SPAWN_COUNTS[t]; n++) {
-            SpawnRequest sr;
-            sr.type = (ItemType)t;
-            sr.preferredFloor = -1;
-            if (t == ITEM_KEYCARD)    sr.preferredFloor = NUM_FLOORS - 1;
-            if (t == ITEM_FLASHLIGHT) sr.preferredFloor = 0;
-            if (t == ITEM_DOCUMENT)   sr.preferredFloor = n % NUM_FLOORS;
-            requests[reqCount++] = sr;
-            printf("[Item] Request %d: type=%d, preferredFloor=%d\n", reqCount-1, sr.type, sr.preferredFloor);
-        }
-    }
-    printf("[Item] Total %d spawn requests\n", reqCount);
 
-    // Assign tiap request ke slot yang belum terpakai (max 1 item per ruangan)
-    bool slotUsed[18] = { false };
+    requests[reqCount++] = { ITEM_KEYCARD, NUM_FLOORS - 1 };
+    requests[reqCount++] = { ITEM_FLASHLIGHT, 0 };
+
+    for (int i = 0; i < 3; i++) {
+        requests[reqCount++] = { ITEM_DOCUMENT, i % NUM_FLOORS };
+    }
+
     for (int r = 0; r < reqCount; r++) {
+
         int assignedSlot = -1;
 
-        // Cari slot di lantai yang diinginkan dulu
-        if (requests[r].preferredFloor >= 0) {
-            int pf = requests[r].preferredFloor;
-            for (int i = 0; i < TOTAL_ROOMS; i++) {
-                if (!slotUsed[i] && (slots[i] / ROOMS_PER_FLOOR) == pf) {
-                    assignedSlot = i;
-                    break;
-                }
+        // REQUIRED ITEM HARUS SPAWN DI FLOOR YANG DITENTUKAN
+        for (int i = 0; i < availableSlots; i++) {
+
+            int floor = slots[i] / NUM_ROOMS_PER_FLOOR;
+
+            if (!slotUsed[i] &&
+                floor == requests[r].preferredFloor) {
+
+                assignedSlot = i;
+                break;
             }
         }
 
-        // Fallback: slot kosong mana saja
+        // Jika floor tujuan tidak punya ruangan terbuka,
+        // jangan fallback ke floor lain.
         if (assignedSlot == -1) {
-            for (int i = 0; i < TOTAL_ROOMS; i++) {
-                if (!slotUsed[i]) {
-                    assignedSlot = i;
-                    break;
-                }
-            }
-        }
-
-        if (assignedSlot == -1) {
-            printf("[Item] WARNING: tidak ada slot kosong untuk item %d!\n", requests[r].type);
+            printf("[ERROR] Required item gagal spawn pada floor %d\n",
+                   requests[r].preferredFloor);
             continue;
         }
 
         slotUsed[assignedSlot] = true;
-        int floor     = slots[assignedSlot] / ROOMS_PER_FLOOR;
-        int roomIndex = slots[assignedSlot] % ROOMS_PER_FLOOR;
 
-        printf("[Item] DEBUG: assignedSlot=%d, slots[assignedSlot]=%d, floor=%d, room=%d\n",
-               assignedSlot, slots[assignedSlot], floor, roomIndex);
-        
-        g_items.push_back(spawnItemInRoom(requests[r].type, floor, roomIndex));
-        printf("[Item] Spawn type=%d -> lantai %d, ruangan %d\n",
-               requests[r].type, floor, roomIndex);
+        int floor = slots[assignedSlot] / NUM_ROOMS_PER_FLOOR;
+        int room  = slots[assignedSlot] % NUM_ROOMS_PER_FLOOR;
+
+        g_items.push_back(
+            spawnItemInRoom(
+                requests[r].type,
+                floor,
+                room
+            )
+        );
     }
 
-    printf("[Item] Total %d items (max 1 per ruangan, 18 slot tersedia).\n",
-           (int)g_items.size());
+    // Validasi jumlah item required
+    int requiredSpawned = 0;
+    for (size_t i = 0; i < g_items.size(); i++) {
+        if (ITEM_CATALOG[g_items[i].type].isRequired)
+            requiredSpawned++;
+    }
+
+    printf("\n[Item] Required spawned = %d/5\n", requiredSpawned);
+
+    ItemType bonusItems[] = {
+        ITEM_MEDKIT,
+        ITEM_MEDKIT,
+        ITEM_BATTERY,
+        ITEM_BATTERY
+    };
+
+    for (int b = 0; b < 4; b++) {
+
+        int assignedSlot = -1;
+
+        for (int i = 0; i < availableSlots; i++) {
+
+            if (!slotUsed[i]) {
+                assignedSlot = i;
+                break;
+            }
+        }
+
+        if (assignedSlot == -1)
+            break;
+
+        slotUsed[assignedSlot] = true;
+
+        int floor =
+            slots[assignedSlot] / NUM_ROOMS_PER_FLOOR;
+
+        int room =
+            slots[assignedSlot] % NUM_ROOMS_PER_FLOOR;
+
+        if (lockedRooms[floor][room]) {
+            printf("[ERROR] Attempted bonus spawn in LOCKED room floor=%d room=%d\n",
+                   floor,
+                   room);
+        } else {
+            g_items.push_back(
+                spawnItemInRoom(
+                    bonusItems[b],
+                    floor,
+                    room
+                )
+            );
+        }
+    }
+
+    printf("[Item] Spawn selesai. Total item = %d", (int)g_items.size());
 }
+
 
 void updateItems(float dt) {
     for (size_t i = 0; i < g_items.size(); i++) {

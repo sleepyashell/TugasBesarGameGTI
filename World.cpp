@@ -203,6 +203,16 @@ void randomizeLockedRooms() {
             attempts++;
         }
     }
+
+    for (int floor = 0; floor < NUM_FLOORS; floor++) {
+        for (int room = 0; room < NUM_ROOMS_PER_FLOOR; room++) {
+            if (lockedRooms[floor][room]) {
+            printf("[LOCKED] floor=%d room=%d\n",
+                   floor,
+                   room);
+         }
+        }
+    }
 }
 
 bool checkCollision(float nextX, float nextZ) {

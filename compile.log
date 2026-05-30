@@ -1,3 +1,7 @@
+Item.cpp:458:23: warning: null character(s) preserved in char literal [-Wnull-character]
+  458 |     g_pickupMsg[0] = '<U+0000>';
+      |                       ^
+1 warning generated.
 Main.cpp:90:5: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
    90 |     sprintf(coordsStr, "PLAYER POS -> X: %.2f  Y: %.2f  Z: %.2f", playerX, playerY, playerZ);
       |     ^
