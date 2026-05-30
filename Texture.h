@@ -8,6 +8,17 @@
 #endif
 
 #include <string>
+#include "World.h"
+
+enum TextureID {
+    TEX_FLOOR_TILE = 0,   // floor_title.bmp - ubin lantai
+    TEX_POSTER_1,         // poster1.bmp
+    TEX_POSTER_2,         // poster2.bmp
+    TEX_POSTER_3,         // poster3.bmp
+    TEX_POSTER_4,         // poster4.bmp
+    NUM_TEXTURES
+};
+
 
 // ==========================================
 // TEXTURE MANAGER
@@ -17,6 +28,10 @@
 // Mengembalikan 0 jika gagal
 GLuint loadBMP(const char* filename);
 
+
+void initTextures();
+void bindTexture(TextureID texID);
+void unbindTexture();
 // Hapus semua texture dari memory GPU
 void cleanupTextures();
 

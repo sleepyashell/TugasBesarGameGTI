@@ -7,6 +7,7 @@
 #include "Drawing.h"
 #include "Material.h"
 #include "World.h"
+#include "Texture.h"
 
 // ==========================================
 // RENDERING HELPERS
@@ -190,5 +191,4 @@ void drawDeskSet(float roomW, float roomD) {
         }
     }
 }
-
 
