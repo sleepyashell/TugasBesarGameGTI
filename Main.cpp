@@ -20,6 +20,7 @@
 #include "Input.h"
 #include "Camera.h"
 #include "Lighting.h"
+#include "Menu.h"
 
 using namespace std;
 
@@ -69,33 +70,37 @@ void drawHUDText(float x, float y, const char* text) {
 }
 
 void display() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
+    if (gameState == STATE_MENU) {
+        drawMenu();
+    } else if (gameState == STATE_PLAYING) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glLoadIdentity();
 
-	setupCamera();
- 	handleAllLighting();
+        setupCamera();
+        handleAllLighting();
 
-    drawGround();
-    //// drawTrees();
-    drawItems();
-    drawBot();
-    
-    
-    drawPlayer();
-    drawRuangGedung();
-    drawAllPosters();
-    
-    // HUD DEBUG: KOORDINAT PLAYER
-    char coordsStr[64];
-    sprintf(coordsStr, "PLAYER POS -> X: %.2f  Y: %.2f  Z: %.2f", playerX, playerY, playerZ);
-    
-    drawHUDText(2.0f, 95.0f, coordsStr);
-    int currentFloor = (int)(playerY / 4.0f) + 1; 
-    char floorStr[32];
-    sprintf(floorStr, "LANTAI: %d", currentFloor);
-    drawHUDText(2.0f, 91.0f, floorStr);
-    drawItemHUD();
-    glutSwapBuffers();
+        drawGround();
+        //// drawTrees();
+        drawItems();
+        drawBot();
+        
+        
+        drawPlayer();
+        drawRuangGedung();
+        drawAllPosters();
+        
+        // HUD DEBUG: KOORDINAT PLAYER
+        char coordsStr[64];
+        sprintf(coordsStr, "PLAYER POS -> X: %.2f  Y: %.2f  Z: %.2f", playerX, playerY, playerZ);
+        
+        drawHUDText(2.0f, 95.0f, coordsStr);
+        int currentFloor = (int)(playerY / 4.0f) + 1; 
+        char floorStr[32];
+        sprintf(floorStr, "LANTAI: %d", currentFloor);
+        drawHUDText(2.0f, 91.0f, floorStr);
+        drawItemHUD();
+        glutSwapBuffers();
+    }
 }
 
 
@@ -133,6 +138,9 @@ void init() {
     buildPhysicalWorld();
     initItems();
     initBot();
+    
+    // Inisialisasi menu
+    initMenu();
 }
 
 
@@ -144,6 +152,38 @@ void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
+void keyboard(unsigned char key, int x, int y) {
+    if (gameState == STATE_MENU) {
+        handleMenuInput(key);
+    } else if (gameState == STATE_PLAYING) {
+        pressNormalKeys(key, x, y);
+    }
+}
+
+void keyboardUp(unsigned char key, int x, int y) {
+    if (gameState == STATE_PLAYING) {
+        releaseNormalKeys(key, x, y);
+    }
+}
+
+void specialKeys(int key, int x, int y) {
+    if (gameState == STATE_MENU) {
+        if (key == GLUT_KEY_UP) {
+            selectedMenuItem = 0;  // PLAY
+        } else if (key == GLUT_KEY_DOWN) {
+            selectedMenuItem = 1;  // EXIT
+        }
+    }
+}
+
+void mouse(int button, int state, int x, int y) {
+    handleMouseClick(button, state, x, y);
+}
+
+void cleanup() {
+    cleanupMenuTextures();
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -152,9 +192,15 @@ int main(int argc, char** argv) {
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glutKeyboardFunc(pressNormalKeys);   
-    glutKeyboardUpFunc(releaseNormalKeys);
+    glutKeyboardFunc(keyboard);   
+    glutKeyboardUpFunc(keyboardUp);
+    glutSpecialFunc(specialKeys);
+    glutMouseFunc(mouse);
     glutTimerFunc(16, update, 0);
+    
+    // Cleanup on exit
+    atexit(cleanup);
+    
     glutMainLoop();
     return 0;
 }

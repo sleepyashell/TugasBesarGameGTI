@@ -463,10 +463,6 @@ void initItems() {
 
     for (int floor = 0; floor < NUM_FLOORS; floor++) {
         for (int room = 0; room < NUM_ROOMS_PER_FLOOR; room++) {
-            printf("[ROOM CHECK] floor=%d room=%d locked=%d\n",
-            floor,
-            room,
-            (int)lockedRooms[floor][room]);
 
             if (room == 3)
                 continue;
