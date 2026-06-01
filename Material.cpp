@@ -16,7 +16,7 @@ void setMaterial(float r, float g, float b, float a,
                  float shininess) {
     GLfloat diff[]  = { r,     g,     b,     a };
     GLfloat amb[]   = { r*0.3f, g*0.3f, b*0.3f, a };
-    GLfloat spec[]  = { specR, specG, specB, 1.0f };
+    GLfloat spec[]  = { specR, specG, specB, a };
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   diff);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   amb);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  spec);
