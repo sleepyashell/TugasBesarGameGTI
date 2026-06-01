@@ -1,41 +1,42 @@
-#ifndef BOT_H
-#define BOT_H
+#ifndef BOT_H_INCLUDED
+#define BOT_H_INCLUDED
 
-extern float playerX;
-extern float playerY;
-extern float playerZ;
-extern bool checkCollision(float nextX, float nextZ);
+// =========================================================================
+// DATA STRUCTURES AI BOT GHOST
+// =========================================================================
 
+// Struct Waypoint bawaan kelompokmu
 struct Waypoint {
-    float x, y, z;
-};
-
-struct EnemyBot {
     float x;
     float y;
     float z;
+};
+
+// Struct data state komponen EnemyBot
+struct EnemyBot {
+    float x, y, z;
     float speed;
     float dirX;
     int currentFloor;
-    int targetNodeIndex; 
     bool movingRight;
     bool isChasing;
     bool isSearching;
+    int targetNodeIndex;
 };
 
-extern EnemyBot ghostBot;
+// Array global untuk menampung 3 hantu (Lantai 1, Lantai 2, Lantai 3)
+extern EnemyBot ghostBots[3];
 
-// Fungsi Utama
+// =========================================================================
+// PROTOTIPE FUNGSI MANAJEMEN AI ARRAY
+// =========================================================================
 void initBot();
 void updateBot();
 void drawBot();
 
-// Fungsi Modularisasi State AI (Helper)
-void handleStairInterpolation();
-bool scanForPlayer();
-void executeChaseMode(int playerFloor);
-void executeStairPatrol();
-void executeCorridorPatrol(int baseIndex);
-void checkStairTrigger(int playerFloor, int baseIndex);
+// Fungsi pendukung pergerakan internal (menerima parameter indeks bot)
+bool scanForPlayer(int botIdx);
+void executeChaseMode(int botIdx, int playerFloor);
+void executeCorridorPatrol(int botIdx);
 
 #endif
