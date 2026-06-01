@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include "Input.h"
 #include "World.h"
+#include "Cutscene.h"
+#include "Menu.h"
 
 extern float playerX;
 extern float playerZ;
@@ -22,6 +24,14 @@ int deltaMoveX = 0;
 int deltaMoveZ = 0;
 
 void pressNormalKeys(unsigned char key, int x, int y) {
+    // Handle cutscene ENTER input
+    if (key == 13) {  // ENTER
+        if (cutsceneManager.isRunning()) {
+            cutsceneManager.advanceDialog();
+            return;
+        }
+    }
+    
     switch (key) {
         // Kontrol Sumbu Z (Maju Mundur)
         case 'w': case 'W': deltaMoveZ = -1; break;
@@ -39,6 +49,11 @@ void pressNormalKeys(unsigned char key, int x, int y) {
 }
 
 void releaseNormalKeys(unsigned char key, int x, int y) {
+    // Ignore key releases during cutscene
+    if (cutsceneManager.isRunning()) {
+        return;
+    }
+    
     switch (key) {
         case 'w': case 'W':
             if (deltaMoveZ < 0) deltaMoveZ = 0; break;
@@ -54,6 +69,12 @@ void releaseNormalKeys(unsigned char key, int x, int y) {
 
 
 void inputMovement() {
+    // Disable movement during cutscene
+    if (cutsceneManager.isRunning()) {
+        isWalking = false;
+        return;
+    }
+    
     if (deltaMoveX != 0 || deltaMoveZ != 0) {
         isWalking = true;
         walkTimer += 0.15f;

@@ -69,4 +69,6 @@ void buildPhysicalWorld();
 bool checkCollision(float nextX, float nextZ);
 void randomizeLockedRooms();
 
+extern bool lockedRooms[NUM_FLOORS][NUM_ROOMS_PER_FLOOR];
+
 #endif

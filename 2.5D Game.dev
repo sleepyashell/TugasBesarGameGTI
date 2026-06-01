@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=30
+UnitCount=58
 
 [VersionInfo]
 Major=1
@@ -39,14 +39,14 @@ Build=0
 LanguageID=1033
 CharsetID=1252
 CompanyName=
-FileVersion=
+FileVersion=1.0.0.0
 FileDescription=Developed using the Dev-C++ IDE
 InternalName=
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=
 ProductName=
-ProductVersion=
+ProductVersion=1.0.0.0
 AutoIncBuildNr=0
 SyncProduct=1
 
@@ -217,30 +217,55 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit19]
-FileName=Item.h
-Folder=Header
-Compile=1
-Link=1
+[Unit18]
+FileName=Bot.o
+Folder=
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
-CompileCpp=1
+
+[Unit19]
+FileName=Building.o
+Folder=
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit20]
+FileName=Drawing.o
+Folder=
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
 
 [Unit21]
-FileName=Player.h
+FileName=horror_game
+Folder=
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit22]
+FileName=Item.h
+CompileCpp=1
 Folder=Header
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
-CompileCpp=1
 
-[Unit22]
-FileName=poster2.bmp
-CompileCpp=1
-Folder=Images
+[Unit23]
+FileName=Item.o
+Folder=
 Compile=0
 Link=0
 Priority=1000
@@ -248,8 +273,17 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit24]
-FileName=poster4.bmp
-Folder=Images
+FileName=Main.o
+Folder=
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit25]
+FileName=Makefile.win
+Folder=
 Compile=0
 Link=0
 Priority=1000
@@ -257,17 +291,16 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit26]
-FileName=Input.cpp
-Folder=Body
-Compile=1
-Link=1
+FileName=Material.o
+Folder=
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
-CompileCpp=1
 
 [Unit27]
-FileName=Camera.cpp
+FileName=Player.cpp
 CompileCpp=1
 Folder=Body
 Compile=1
@@ -277,7 +310,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit28]
-FileName=Camera.h
+FileName=Player.h
 CompileCpp=1
 Folder=Header
 Compile=1
@@ -287,24 +320,22 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit29]
-FileName=Lighting.cpp
-Folder=Body
-Compile=1
-Link=1
+FileName=Player.o
+Folder=
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
-CompileCpp=1
 
 [Unit30]
-FileName=Lighting.h
-Folder=Header
-Compile=1
-Link=1
+FileName=poster2.bmp
+Folder=Images
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
-CompileCpp=1
 
 [Unit31]
 FileName=poster3.bmp
@@ -402,17 +433,27 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit18]
-FileName=horror_game
-Folder=
+[Unit41]
+FileName=floor_title.bmp
+Folder=Images
 Compile=0
 Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit20]
-FileName=Player.cpp
+[Unit42]
+FileName=Menu.h
+CompileCpp=1
+Folder=Header
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit43]
+FileName=Menu.cpp
 CompileCpp=1
 Folder=Body
 Compile=1
@@ -421,19 +462,140 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit23]
-FileName=poster3.bmp
-Folder=Images
+[Unit44]
+FileName=.DS_Store
+Folder=2.5D Game
 Compile=0
 Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit25]
-FileName=Input.h
+[Unit45]
+FileName=2.5D Game.exe
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit46]
+FileName=Camera.o
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit47]
+FileName=compile.log
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit48]
+FileName=Cutscene.cpp
 CompileCpp=1
-Folder=Header
+Folder=2.5D Game
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit49]
+FileName=Cutscene.h
+CompileCpp=1
+Folder=2.5D Game
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit50]
+FileName=CUTSCENE_SOUND_GUIDE.md
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit51]
+FileName=HorrorGame
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit52]
+FileName=Input.o
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit53]
+FileName=kentung
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit54]
+FileName=Lighting.o
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit55]
+FileName=Menu.o
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit56]
+FileName=Menu_new.cpp
+CompileCpp=1
+Folder=2.5D Game
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit57]
+FileName=Sound.cpp
+CompileCpp=1
+Folder=2.5D Game
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit58]
+FileName=Sound.h
+CompileCpp=1
+Folder=2.5D Game
 Compile=1
 Link=1
 Priority=1000

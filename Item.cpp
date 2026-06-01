@@ -455,7 +455,7 @@ void initItems() {
     for (int t = 0; t < NUM_ITEM_TYPES; t++)
         g_inventory[t] = 0;
 
-    g_pickupMsg[0] = ' ';
+    g_pickupMsg[0] = '\0';
     g_pickupMsgTimer = 0.0f;
 
     int slots[NUM_FLOORS * NUM_ROOMS_PER_FLOOR];
@@ -463,10 +463,6 @@ void initItems() {
 
     for (int floor = 0; floor < NUM_FLOORS; floor++) {
         for (int room = 0; room < NUM_ROOMS_PER_FLOOR; room++) {
-            printf("[ROOM CHECK] floor=%d room=%d locked=%d\n",
-            floor,
-            room,
-            (int)lockedRooms[floor][room]);
 
             if (room == 3)
                 continue;
