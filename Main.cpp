@@ -76,9 +76,11 @@ void display() {
  	handleAllLighting();
 
     drawGround();
-    // drawTrees();
+    //// drawTrees();
     drawItems();
     drawBot();
+    
+    
     drawPlayer();
     drawRuangGedung();
     
@@ -91,7 +93,7 @@ void display() {
     char floorStr[32];
     sprintf(floorStr, "LANTAI: %d", currentFloor);
     drawHUDText(2.0f, 91.0f, floorStr);
-
+    drawItemHUD();
     glutSwapBuffers();
 }
 
@@ -100,6 +102,9 @@ void update(int v) {
     handleAllInput();
     updateItems(0.016f);
     checkItemPickup();
+    bool animChanged = updateDoorAnimations(0.016f);
+    checkDoorProximity();
+    buildPhysicalWorld();
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
     updateBot();
@@ -110,9 +115,10 @@ void init() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.04f, 0.04f, 0.10f, 1.0f);
+    initDoorAnimations();
     setupLighting();
+    initTextures();
     initPosters();
-    
     srand(time(0));
     
     // Random door state saat game start

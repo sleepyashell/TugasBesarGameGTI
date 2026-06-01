@@ -20,17 +20,12 @@ using namespace std;
 // ==========================================
 // KONSTANTA ITEM
 // ==========================================
-struct SpawnZone {
-    float xMin, xMax, zMin, zMax;
-    bool  isCorridor;
-    int   roomIndex; 
-};
 
 static const float PICKUP_RADIUS     = 1.2f;   // jarak maks pengambilan item
 static const float BOB_AMPLITUDE     = 0.12f;  // amplitudo animasi naik-turun
 static const float BOB_SPEED         = 2.0f;   // kecepatan bobbing 
 static const float ROT_SPEED         = 90.0f;  // kecepatan rotasi
-static const float ITEM_BASE_HEIGHT  = 0.9f;   // tinggi default item di atas lantai
+static const float ITEM_BASE_HEIGHT  = 1.2f;   // tinggi default item di atas lantai
 
 // ==========================================
 // DATA ITEM (nama, deskripsi, wajib/tidak)
@@ -62,20 +57,6 @@ static const int SPAWN_COUNTS[NUM_ITEM_TYPES] = {
     2,  // BATTERY   - bonus
 };
 
-static const SpawnZone ALL_ZONES[] = {
-    // Koridor utama
-    { 6.0f,  50.0f,  1.5f,  3.5f,  true,  -1 },
-
-    // Ruangan kiri
-    { 2.0f,   6.0f, -7.0f, -2.5f, false,  0 },   // Room 0: x=0..8
-    {10.0f,  14.0f, -7.0f, -2.5f, false,  1 },   // Room 1: x=8..16
-    {18.0f,  22.0f, -7.0f, -2.5f, false,  2 },   // Room 2: x=16..24
-
-    // Ruangan kanan
-    {42.0f,  46.0f, -7.0f, -2.5f, false,  4 },   // Room 4: x=40..48
-    {50.0f,  53.0f, -7.0f, -2.5f, false,  5 },   // Room 5: x=48..56
-};
-static const int NUM_ALL_ZONES = 6;
 // ==========================================
 // STATE GLOBAL
 // ==========================================
@@ -123,6 +104,99 @@ static void setItemColor(ItemType type) {
         default:
             setMaterial(1.0f, 1.0f, 1.0f, 1.0f);
     }
+}
+
+
+// Helper: render string pakai glutBitmapCharacter di posisi HUD (koordinat ortho 0-100)
+static void hudPrint(float x, float y, const char* text) {
+    glRasterPos2f(x, y);
+    while (*text) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *text);
+        text++;
+    }
+}
+
+// HUD
+void drawItemHUD()
+{
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 100, 0, 100);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // ==========================
+    // POSISI HUD ITEM - pojok kanan atas
+    // (tidak menabrak koordinat player di kiri atas)
+    // ==========================
+    const float startX  = 88.0f;   // kanan layar
+    const float startY  = 95.0f;   // baris paling atas
+    const float lineGap =  4.0f;
+
+    char buffer[128];
+
+    // --- Judul OBJECTIVES ---
+    glColor3f(1.0f, 1.0f, 0.2f);
+    snprintf(buffer, sizeof(buffer), "OBJECTIVES %d/%d",
+            getCollectedRequiredCount(),
+            getTotalRequiredCount());
+    hudPrint(startX, startY, buffer);
+
+    // --- Key Card ---
+    bool haveKeycard = (g_inventory[ITEM_KEYCARD] >= REQUIRED_COUNTS[ITEM_KEYCARD]);
+    glColor3f(haveKeycard ? 0.3f : 0.9f,
+              haveKeycard ? 1.0f : 0.9f,
+              haveKeycard ? 0.3f : 0.2f);
+    snprintf(buffer, sizeof(buffer), "[%s] Key Card  : %d/%d",
+            haveKeycard ? "v" : " ",
+            g_inventory[ITEM_KEYCARD],
+            REQUIRED_COUNTS[ITEM_KEYCARD]);
+    hudPrint(startX, startY - lineGap, buffer);
+
+    // --- Flashlight ---
+    bool haveFlash = (g_inventory[ITEM_FLASHLIGHT] >= REQUIRED_COUNTS[ITEM_FLASHLIGHT]);
+    glColor3f(haveFlash ? 0.3f : 0.9f,
+              haveFlash ? 1.0f : 0.9f,
+              haveFlash ? 0.3f : 0.2f);
+    snprintf(buffer, sizeof(buffer), "[%s] Flashlight: %d/%d",
+            haveFlash ? "v" : " ",
+            g_inventory[ITEM_FLASHLIGHT],
+            REQUIRED_COUNTS[ITEM_FLASHLIGHT]);
+    hudPrint(startX, startY - lineGap * 2, buffer);
+
+    // --- Document ---
+    bool haveDoc = (g_inventory[ITEM_DOCUMENT] >= REQUIRED_COUNTS[ITEM_DOCUMENT]);
+    glColor3f(haveDoc ? 0.3f : 0.9f,
+              haveDoc ? 1.0f : 0.9f,
+              haveDoc ? 0.3f : 0.2f);
+    snprintf(buffer, sizeof(buffer), "[%s] Document  : %d/%d",
+            haveDoc ? "v" : " ",
+            g_inventory[ITEM_DOCUMENT],
+            REQUIRED_COUNTS[ITEM_DOCUMENT]);
+    hudPrint(startX, startY - lineGap * 3, buffer);
+
+    // --- Pickup notification (tengah layar, di bawah) ---
+    if (g_pickupMsgTimer > 0.0f) {
+        glColor3f(0.3f, 1.0f, 0.3f);
+        hudPrint(38.0f, 20.0f, g_pickupMsg);
+    }
+
+    glPopMatrix();
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    glMatrixMode(GL_MODELVIEW);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
 }
 
 // ==========================================
@@ -310,73 +384,57 @@ static void drawItemAura(ItemType type, float bobOffset) {
 // SPAWN LOGIC
 // ==========================================
 
+// 6 ruangan per lantai sesuai layout Building.cpp:
+// Room 0..3: X=0..8, 8..16, 16..24, 24..32
+// Room 4..5: X=40..48, 48..56  (skip area tangga X=32..40)
+// Depth ruangan: Z=0..Z=-10, margin 0.8f dari setiap dinding
 
+static const int ROOMS_PER_FLOOR = 6;
 
-static const SpawnZone SPAWN_ZONES[] = {
-    // Koridor utama (lebih aman, dalam area playable)
-    { 6.0f,  50.0f,  1.5f,  3.5f,  true  },
-
-    // Ruangan kiri
-    { 2.0f,   6.0f, -7.0f, -2.5f, false },
-    {10.0f,  14.0f, -7.0f, -2.5f, false },
-    {18.0f,  22.0f, -7.0f, -2.5f, false },
-
-    // Ruangan kanan
-    {42.0f,  46.0f, -7.0f, -2.5f, false },
-    {50.0f,  53.0f, -7.0f, -2.5f, false },
+struct RoomZone {
+    float xMin, xMax, zMin, zMax;
 };
-static const int NUM_SPAWN_ZONES = sizeof(SPAWN_ZONES) / sizeof(SPAWN_ZONES[0]);
+
+static const RoomZone ROOM_ZONES[ROOMS_PER_FLOOR] = {
+    {  1.5f,  6.5f, -8.5f, -2.0f },  // Room 0 (0..8)
+    {  9.5f, 14.5f, -8.5f, -2.0f },  // Room 1 (8..16)
+    { 17.5f, 22.5f, -8.5f, -2.0f },  // Room 2 (16..24)
+
+    // Area tangga (24..36)
+    { 25.5f, 30.5f, -8.5f, -2.0f },  // Room 3 - tidak dipakai
+
+    { 37.5f, 42.5f, -8.5f, -2.0f },  // Room 4 (36..44)
+    { 45.5f, 50.5f, -8.5f, -2.0f },  // Room 5 (44..52)
+};
 
 // Random float dalam range [lo, hi]
 static float randf(float lo, float hi) {
     return lo + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * (hi - lo);
 }
 
-// Cek apakah zona spawn valid (tidak di ruangan terkunci)
-static bool isZoneValid(const SpawnZone& zone, int floor) {
-    if (zone.isCorridor) return true; // Koridor selalu valid
-    if (zone.roomIndex < 0) return true;
-    if (zone.roomIndex >= NUM_ROOMS_PER_FLOOR) return true;
-    // Cek apakah ruangan terkunci di lantai ini
-    return !lockedRooms[floor][zone.roomIndex];
-}
-
-static WorldItem spawnItem(ItemType type, int preferredFloor) {
+// Spawn 1 item di ruangan dan lantai tertentu
+static WorldItem spawnItemInRoom(ItemType type, int floor, int roomIndex) {
     WorldItem item;
-    item.type       = type;
-    item.collected  = false;
-    item.bobTimer   = randf(0.0f, 6.28f);
-    item.rotAngle   = randf(0.0f, 360.0f);
-    item.floor      = preferredFloor;
+    item.type      = type;
+    item.collected = false;
+    item.bobTimer  = randf(0.0f, 6.28f);
+    item.rotAngle  = randf(0.0f, 360.0f);
+    item.floor     = floor;
 
-    // Filter zona yang tersedia untuk lantai ini
-    vector<SpawnZone> validZones;
-    
-    for (int i = 0; i < NUM_ALL_ZONES; i++) {
-        if (isZoneValid(ALL_ZONES[i], preferredFloor)) {
-            validZones.push_back(ALL_ZONES[i]);
-        }
-    }
+    const RoomZone& room = ROOM_ZONES[roomIndex];
+    // Spawn di area aman bagian tengah ruangan
+    item.x = randf(room.xMin, room.xMax);
+    item.z = randf(room.zMin, room.zMax);
 
-    // Jika tidak ada zona valid (semua ruangan terkunci), fallback ke koridor
-    if (validZones.empty()) {
-        validZones.push_back(ALL_ZONES[0]); // Koridor
-    }
+    // Hindari dekat pintu depan
+    if (item.z > -2.5f)
+        item.z = -2.5f;
 
-    // Pilih zona spawn random dari yang valid
-    int  zoneIdx = rand() % validZones.size();
-    const SpawnZone& zone = validZones[zoneIdx];
+    // Posisi item mengikuti tinggi lantai dunia yang dipakai Building/World
+    item.y = floor * FLOOR_HEIGHT + ITEM_BASE_HEIGHT;
 
-    item.x = randf(zone.xMin, zone.xMax);
-    item.z = randf(zone.zMin, zone.zMax);
-
-    // Safety margin (sama seperti sebelumnya)
-    if (item.x < 1.5f) item.x = 1.5f;
-    if (item.x > 54.5f) item.x = 54.5f;
-    if (item.z > 3.5f) item.z = 3.5f;
-    if (item.z < -7.5f) item.z = -7.5f;
-
-    item.y = preferredFloor * FLOOR_HEIGHT + ITEM_BASE_HEIGHT;
+    printf("[DEBUG] Item spawn: type=%d, floor=%d, room=%d -> X=%.1f Y=%.1f Z=%.1f\n",
+           type, floor, roomIndex, item.x, item.y, item.z);
 
     return item;
 }
@@ -385,6 +443,7 @@ static WorldItem spawnItem(ItemType type, int preferredFloor) {
 // IMPLEMENTASI API PUBLIK
 // ==========================================
 
+
 void initItems() {
     if (!g_initialized) {
         srand((unsigned int)time(NULL));
@@ -392,32 +451,164 @@ void initItems() {
     }
 
     g_items.clear();
-    for (int t = 0; t < NUM_ITEM_TYPES; t++) {
-        g_inventory[t] = 0;
-    }
 
-    g_pickupMsg[0]  = '\0';
+    for (int t = 0; t < NUM_ITEM_TYPES; t++)
+        g_inventory[t] = 0;
+
+    g_pickupMsg[0] = ' ';
     g_pickupMsgTimer = 0.0f;
 
-    int totalItems = 0;
-    for (int t = 0; t < NUM_ITEM_TYPES; t++) {
-        totalItems += SPAWN_COUNTS[t];
-    }
+    int slots[NUM_FLOORS * NUM_ROOMS_PER_FLOOR];
+    int availableSlots = 0;
 
-    // Spawn tiap tipe item
-    for (int t = 0; t < NUM_ITEM_TYPES; t++) {
-        for (int n = 0; n < SPAWN_COUNTS[t]; n++) {
-            // Sebar merata di berbagai lantai
-            int floor = n % NUM_FLOORS;
-            // Untuk keycard: selalu di lantai teratas agar lebih menantang
-            if (t == ITEM_KEYCARD) floor = NUM_FLOORS - 1;
-            // Untuk senter: lantai dasar agar mudah ditemukan duluan
-            if (t == ITEM_FLASHLIGHT) floor = 0;
+    for (int floor = 0; floor < NUM_FLOORS; floor++) {
+        for (int room = 0; room < NUM_ROOMS_PER_FLOOR; room++) {
+            printf("[ROOM CHECK] floor=%d room=%d locked=%d\n",
+            floor,
+            room,
+            (int)lockedRooms[floor][room]);
 
-            g_items.push_back(spawnItem((ItemType)t, floor));
+            if (room == 3)
+                continue;
+
+            if (lockedRooms[floor][room])
+                continue;
+
+            slots[availableSlots++] =
+                floor * NUM_ROOMS_PER_FLOOR + room;
         }
     }
+
+    printf("[Item] Available rooms: %d", availableSlots);
+
+    const int REQUIRED_ITEM_COUNT = 5;
+
+    if (availableSlots < REQUIRED_ITEM_COUNT) {
+        printf("[Item] ERROR: Tidak cukup ruangan terbuka!");
+        return;
+    }
+
+    for (int i = availableSlots - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+
+        int tmp = slots[i];
+        slots[i] = slots[j];
+        slots[j] = tmp;
+    }
+
+    bool slotUsed[NUM_FLOORS * NUM_ROOMS_PER_FLOOR] = { false };
+
+    struct SpawnRequest {
+        ItemType type;
+        int preferredFloor;
+    };
+
+    SpawnRequest requests[32];
+    int reqCount = 0;
+
+    requests[reqCount++] = { ITEM_KEYCARD, NUM_FLOORS - 1 };
+    requests[reqCount++] = { ITEM_FLASHLIGHT, 0 };
+
+    for (int i = 0; i < 3; i++) {
+        requests[reqCount++] = { ITEM_DOCUMENT, i % NUM_FLOORS };
+    }
+
+    for (int r = 0; r < reqCount; r++) {
+
+        int assignedSlot = -1;
+
+        // REQUIRED ITEM HARUS SPAWN DI FLOOR YANG DITENTUKAN
+        for (int i = 0; i < availableSlots; i++) {
+
+            int floor = slots[i] / NUM_ROOMS_PER_FLOOR;
+
+            if (!slotUsed[i] &&
+                floor == requests[r].preferredFloor) {
+
+                assignedSlot = i;
+                break;
+            }
+        }
+
+        // Jika floor tujuan tidak punya ruangan terbuka,
+        // jangan fallback ke floor lain.
+        if (assignedSlot == -1) {
+            printf("[ERROR] Required item gagal spawn pada floor %d\n",
+                   requests[r].preferredFloor);
+            continue;
+        }
+
+        slotUsed[assignedSlot] = true;
+
+        int floor = slots[assignedSlot] / NUM_ROOMS_PER_FLOOR;
+        int room  = slots[assignedSlot] % NUM_ROOMS_PER_FLOOR;
+
+        g_items.push_back(
+            spawnItemInRoom(
+                requests[r].type,
+                floor,
+                room
+            )
+        );
+    }
+
+    // Validasi jumlah item required
+    int requiredSpawned = 0;
+    for (size_t i = 0; i < g_items.size(); i++) {
+        if (ITEM_CATALOG[g_items[i].type].isRequired)
+            requiredSpawned++;
+    }
+
+    printf("\n[Item] Required spawned = %d/5\n", requiredSpawned);
+
+    ItemType bonusItems[] = {
+        ITEM_MEDKIT,
+        ITEM_MEDKIT,
+        ITEM_BATTERY,
+        ITEM_BATTERY
+    };
+
+    for (int b = 0; b < 4; b++) {
+
+        int assignedSlot = -1;
+
+        for (int i = 0; i < availableSlots; i++) {
+
+            if (!slotUsed[i]) {
+                assignedSlot = i;
+                break;
+            }
+        }
+
+        if (assignedSlot == -1)
+            break;
+
+        slotUsed[assignedSlot] = true;
+
+        int floor =
+            slots[assignedSlot] / NUM_ROOMS_PER_FLOOR;
+
+        int room =
+            slots[assignedSlot] % NUM_ROOMS_PER_FLOOR;
+
+        if (lockedRooms[floor][room]) {
+            printf("[ERROR] Attempted bonus spawn in LOCKED room floor=%d room=%d\n",
+                   floor,
+                   room);
+        } else {
+            g_items.push_back(
+                spawnItemInRoom(
+                    bonusItems[b],
+                    floor,
+                    room
+                )
+            );
+        }
+    }
+
+    printf("[Item] Spawn selesai. Total item = %d", (int)g_items.size());
 }
+
 
 void updateItems(float dt) {
     for (size_t i = 0; i < g_items.size(); i++) {
@@ -465,17 +656,19 @@ void drawItems() {
 
         float bobOffset = sinf(item.bobTimer * BOB_SPEED) * BOB_AMPLITUDE;
 
+        // Aura di matrix sendiri, tidak kena rotasi Y item
+        glPushMatrix();
+            glTranslatef(item.x, item.y + bobOffset, item.z);
+            drawItemAura(item.type, item.bobTimer);
+        glPopMatrix();
+
+        // Item shape dengan rotasi dan scale
         glPushMatrix();
             glTranslatef(item.x, item.y + bobOffset, item.z);
             glRotatef(item.rotAngle, 0.0f, 1.0f, 0.0f);
-
-            // Gambar aura di bawah item
-            drawItemAura(item.type, item.bobTimer);
-
-            // Set warna dan gambar bentuk item
+            glScalef(1.5f, 1.5f, 1.5f);
             setItemColor(item.type);
             drawItemShape(item.type);
-
         glPopMatrix();
     }
 }
@@ -526,4 +719,3 @@ void resetItems() {
     g_pickupMsgTimer = 0.0f;
     initItems();
 }
-

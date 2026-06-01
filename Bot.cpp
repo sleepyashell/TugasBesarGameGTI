@@ -6,8 +6,9 @@
 
 #include <cstdlib> 
 #include <cmath>    
-#include "bot.h"
-#include "World.h" // Membaca checkCollision
+
+#include "Bot.h"
+#include "World.h" 
 
 // Instansiasi array hantu global untuk 3 lantai
 EnemyBot ghostBots[3];

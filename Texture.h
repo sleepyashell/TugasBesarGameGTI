@@ -8,41 +8,37 @@
 #endif
 
 #include <string>
+#include "World.h"
+
+enum TextureID {
+    TEX_FLOOR_TILE = 0,   // floor_title.bmp - ubin lantai
+    TEX_WALL,             // wall.bmp - texture dinding
+    TEX_POSTER_1,         // poster1.bmp
+    TEX_POSTER_2,         // poster2.bmp
+    TEX_POSTER_3,         // poster3.bmp
+    TEX_POSTER_4,         // poster4.bmp
+    NUM_TEXTURES
+};
 
 // ==========================================
 // TEXTURE MANAGER
 // ==========================================
 
-// Load file BMP dan return texture ID OpenGL
-// Mengembalikan 0 jika gagal
 GLuint loadBMP(const char* filename);
 
-// Hapus semua texture dari memory GPU
+void initTextures();
+void bindTexture(TextureID texID);
+void unbindTexture();
 void cleanupTextures();
 
 // ==========================================
 // POSTER
 // ==========================================
 
-// Gambar 1 poster persegi panjang dengan texture
-// x,y,z = posisi pojok kiri-bawah poster
-// w,h   = lebar dan tinggi poster
-// axis  = 'Z' (tembok depan, menghadap +Z), 
-//         'z' (tembok belakang, menghadap -Z),
-//         'X' (tembok kiri/kanan, menghadap +/-X)
 void drawPoster(float x, float y, float z, float w, float h, char axis, GLuint texID, float alpha = 1.0f);
-
-// Inisialisasi semua texture poster (dipanggil sekali di init())
 void initPosters();
-
-// Gambar poster untuk 1 ruangan tertentu
-// f = nomor lantai, roomIndex = indeks ruangan (0..3 untuk 4 poster per lantai)
 void drawRoomPosters(int f, int roomIndex);
-
-// Gambar semua poster untuk 1 lantai (4 poster)
 void drawFloorPosters(int f);
-
-// Gambar semua poster untuk seluruh gedung
 void drawAllPosters();
 
 #endif
