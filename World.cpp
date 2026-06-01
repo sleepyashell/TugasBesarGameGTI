@@ -99,6 +99,11 @@ bool updateDoorAnimations(float dt) {
             }
         }
     }
+    
+    if (anyAnimating) {
+        buildPhysicalWorld(); 
+    }
+    
     return anyAnimating;
 }
 
@@ -232,10 +237,6 @@ void handleStairs() {
     }
 }
 
-// ==========================================
-// BUILD PHYSICAL WORLD - FULL FIXED
-// ==========================================
-
 void buildPhysicalWorld() {
     colliders.clear();
     
@@ -243,20 +244,8 @@ void buildPhysicalWorld() {
         float yBot = f * FLOOR_HEIGHT;
         float yTop = yBot + FLOOR_HEIGHT;
 
-        // ========================================
-        // 1. DINDING BELAKANG KORIDOR (Z = 4.0)
-        // ========================================
-        registerCollider(0.0f, 4.0f, 56.0f, 0.2f, yBot, yTop);
-
-        // ========================================
-        // 2. DINDING BELAKANG RUANGAN (Z = -10.0)
-        // ========================================
-        registerCollider(0.0f, -10.0f, 56.0f, 0.2f, yBot, yTop);
-
-        // ========================================
-        // 3. DINDING DEPAN RUANGAN (Z = 0.0)
-        // ========================================
-        // Untuk setiap ruangan, gambar dinding depan kecuali lubang pintu
+        registerCollider(0.0f,  3.9f, 52.0f, 0.2f, yBot, yTop);
+        registerCollider(0.0f, -10.0f, 52.0f, 0.2f, yBot, yTop);
         
         for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
             if (r == 3) {
@@ -290,7 +279,6 @@ void buildPhysicalWorld() {
         if (f == 0 && !isDoorOpen) {
             registerCollider(1.0f, 0.0f, 2.0f, 0.2f, yBot, yTop);
         }
-
         // ========================================
         // 5. COLLIDER PINTU RUANGAN (DINAMIS)
         // ========================================
@@ -322,25 +310,28 @@ void buildPhysicalWorld() {
                                         remainingWidth, door.d, yBot, yTop);
                     }
                 }
-                // angle >= 60: terbuka lebar - no collider
             }
         }
 
         // ========================================
         // 6. SEKAT ANTAR RUANGAN (DINDING TEGAK)
         // ========================================
-        // Sekat di X=8, 16, 24, 32, 40, 48
-        float sekatX[] = { 8.0f, 16.0f, 24.0f, 32.0f, 40.0f, 48.0f };
+        float sekatX[] = { 7.95f, 15.95f, 23.95f, 31.95f, 35.95f, 43.95f };
         for (int i = 0; i < 6; i++) {
-            registerCollider(sekatX[i] - 0.1f, 0.0f, 0.2f, 10.0f, yBot, yTop);
+            registerCollider(sekatX[i], 0.0f, 0.05f, 10.0f, yBot, yTop);
         }
 
         // ========================================
         // 7. DINDING LUAR KIRI & KANAN
         // ========================================
-        registerCollider(-0.2f, 0.0f, 0.2f, 10.0f, yBot, yTop);   // Kiri
-        registerCollider(55.8f, 0.0f, 0.2f, 10.0f, yBot, yTop);   // Kanan
-
+        registerCollider(0.0f, 0.0f, 0.1f, 10.0f, yBot, yTop);   // Kiri
+        registerCollider(51.9f, 0.0f, 0.1f, 10.0f, yBot, yTop);   // Kanan
+        // Pojok kiri koridor
+		registerCollider(52.0f, 4.0f, 0.2f, 4.0f, yBot, yTop);
+		// Pojok kanan koridor
+        if (f > 0){
+        	registerCollider(0.0f, 4.0f, 0.2f, 4.0f, yBot, yTop);
+        }
         // ========================================
         // 8. COLLIDER MEJA
         // ========================================
@@ -373,9 +364,12 @@ void buildPhysicalWorld() {
         // 9. COLLIDER TANGGA
         // ========================================
         if (f < NUM_FLOORS - 1) {
-            registerCollider(32.0f, -6.6f, 0.2f, 5.6f, yBot, yTop);  // Kiri
-            registerCollider(36.0f, -6.6f, 0.2f, 5.6f, yBot, yTop);  // Kanan
-            registerCollider(32.0f, -6.6f, 4.0f, 2.0f, yBot + 2.4f, yBot + 2.6f); // Bordes
+            registerCollider(32.0f, -6.0f, 4.0f, 0.2f, yBot, yTop);
+            registerCollider(34.0f, -1.0f, 0.05f, 3.5f, yBot, yTop);
+            if (f == 0){
+            	registerCollider(32.0f, -4.5f, 2.0f, 0.05f, 0.8f, 2.0f);
+            }
+
         }
     }
 }
@@ -386,6 +380,10 @@ void randomizeLockedRooms() {
             lockedRooms[f][r] = false;
         }
     }
+    
+    
+    
+    
 
     for (int f = 0; f < NUM_FLOORS; f++) {
         int numLocked = 1 + (rand() % 2);

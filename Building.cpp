@@ -399,14 +399,15 @@ void drawDoubleDoor(float alpha) {
 void drawFrontWall(float width, float depth, float startX, bool isFlipped,
                    float floorY) {
     // Cek apakah player di dalam ruangan ini (untuk transparansi)
-    bool  insideZ   = (playerZ < 0.5f);
+    bool  insideZ   = (playerZ < 0.0f);
     bool  insideX   = (playerX >= startX && playerX <= startX + width);
     bool  sameFloor = (playerY >= floorY && playerY < floorY + FLOOR_HEIGHT);
-    float alpha     = (insideZ && insideX && sameFloor) ? 0.35f : 1.0f;
+    float alpha     = (insideZ && insideX && sameFloor) ? 0.05f : 1.0f;
 
     if (alpha < 1.0f) {
         glDepthMask(GL_FALSE);
         glDisable(GL_LIGHTING);
+        
     }
 
     // Hitung doorX relatif terhadap startX
@@ -441,13 +442,8 @@ void drawFrontWall(float width, float depth, float startX, bool isFlipped,
             matConcrete(); 
             drawWallBlock(2.0f, 1.5f, 0.2f);
         glPopMatrix();
-        unbindTexture();
     }
 
-    if (alpha < 1.0f) {
-        glEnable(GL_LIGHTING);
-        glDepthMask(GL_TRUE);
-    }
 
     // === GAMBAR PINTU ANIMATIF ===
     // Gunakan getRoomIndexFromX untuk mapping yang konsisten
@@ -471,10 +467,20 @@ void drawFrontWall(float width, float depth, float startX, bool isFlipped,
             drawDoubleDoor(alpha);
         glPopMatrix();
     }
+    
+    if (alpha < 1.0f) {
+        glEnable(GL_LIGHTING);
+        glDepthMask(GL_TRUE);
+    }
+    
+    if (alpha == 1.0f) {
+        unbindTexture(); 
+    }
 }
 
-void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown) {
-    glPushMatrix();
+void drawOneLantai(float offsetY, int currentFloor, bool hasStairDown) {
+	bool isLastFloor  = (currentFloor == NUM_FLOORS - 1);
+	glPushMatrix();
     glTranslatef(0, offsetY, 0);
 
         glPushMatrix();
@@ -505,6 +511,10 @@ void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown) {
             drawFrontWall(8, 10, 44, false, offsetY);
         glPopMatrix();
         
+		for (int room = 0; room < 4; room++) {
+	        drawRoomPosters(currentFloor, room);
+	    }
+        
         glPushMatrix();
             glTranslatef(0, 0, 4);
             drawCorridorFront(52, offsetY); // Gunakan offsetY untuk kalkulasi tekstur/posisi vertikal
@@ -514,9 +524,8 @@ void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown) {
 
 void drawRuangGedung() {
     for (int f = 0; f < NUM_FLOORS; f++) {
-        bool isLastFloor  = (f == NUM_FLOORS - 1);
         bool hasStairDown = (f > 0);
-        drawOneLantai(f * FLOOR_HEIGHT, isLastFloor, hasStairDown);
+        drawOneLantai(f * FLOOR_HEIGHT, f, hasStairDown);
     }
 }
 

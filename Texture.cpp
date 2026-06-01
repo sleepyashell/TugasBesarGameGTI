@@ -287,14 +287,17 @@ void drawRoomPosters(int f, int roomIndex) {
 
     float pw = 1.5f;                
     float ph = 2.0f;                
-    float pz = 0.25f;               
+    float pz = 0.05f;               
 
     GLuint texID = g_posterTex[roomIndex % NUM_POSTERS];
     if (texID == 0) return;  
 
     // Hitung posisi batas X ruangan untuk deteksi player
     float startX = roomIndex * 8.0f;
-    if (roomIndex >= 3) startX = 37.0f; // Sesuai aturan area tangga
+    
+    // PERBAIKAN: Diubah dari 37.0f menjadi 36.0f agar sinkron dengan startX di Building.cpp
+    if (roomIndex >= 3) startX = 36.0f; 
+    
     float roomWidth = 8.0f;
 
     // === HITUNG ALPHA SAMA PERSIS DENGAN TEMBOK DEPAN ===
@@ -351,7 +354,8 @@ void bindTexture(TextureID texID) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         
         g_textureBound = true;
-        printf("[Texture] Bound: ID=%u\n", g_textures[texID]);
+        
+        // BARIS PRINTF LOG SUDAH DIHAPUS BIAR RE-RENDER GRAFIS ENTEK GAK PUTIH POLOS
     } else {
         printf("[Texture] ERROR: Cannot bind texture %d (ID=%u)\n", texID, 
                (texID >= 0 && texID < NUM_TEXTURES) ? g_textures[texID] : 999);

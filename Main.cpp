@@ -98,12 +98,14 @@ void display() {
         //// drawTrees();
         drawItems();
         drawBot();
-        
-        
         drawPlayer();
         drawRuangGedung();
-        drawAllPosters();
         
+        // PASS 2: Objek transparan (depthMask off)
+	    glDepthMask(GL_FALSE);
+	    // drawFrontWall sudah handle sendiri, tapi sorting tetap penting
+	    glDepthMask(GL_TRUE);
+	        
         // HUD DEBUG: KOORDINAT PLAYER
         char coordsStr[64];
         sprintf(coordsStr, "PLAYER POS -> X: %.2f  Y: %.2f  Z: %.2f", playerX, playerY, playerZ);
@@ -131,7 +133,6 @@ void update(int v) {
     checkItemPickup();
     bool animChanged = updateDoorAnimations(0.016f);
     checkDoorProximity();
-    buildPhysicalWorld();
     
     // Update cutscene
     cutsceneManager.update(0.016f);
