@@ -243,6 +243,11 @@ void buildPhysicalWorld() {
         float yBot = f * FLOOR_HEIGHT;
         float yTop = yBot + FLOOR_HEIGHT;
 
+<<<<<<< HEAD
+=======
+        registerCollider(0.0f,  3.9f, 52.0f, 0.2f, yBot, yTop);
+        registerCollider(0.0f, -6.5f, 52.0f, 0.2f, yBot, yTop);
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
 
         registerCollider(0.0f,  3.9f, 52.0f, 0.2f, yBot, yTop);
         registerCollider(0.0f, -6.5f, 52.0f, 0.2f, yBot, yTop);
@@ -328,11 +333,14 @@ void buildPhysicalWorld() {
             registerCollider(sx,        0.0f, 1.0f, 0.2f, yBot, yTop);
             registerCollider(sx + 3.0f, 0.0f, 5.0f, 0.2f, yBot, yTop);
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (i == 6){
             	registerCollider(sx + 8, 0.0f, 0.2f, 10.0f, yBot, yTop);
 	            registerCollider(sx + 8,        4.0f, 0.2f, 4.0f, yBot, yTop);
             }
 
+=======
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
 =======
 >>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
             

@@ -49,6 +49,7 @@ void drawCorridorFront(float width, float floorY) {
         glDisable(GL_LIGHTING);
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 	// 1. Pojok Kiri Lorong
     if (floorY > 5.0f) {
@@ -59,6 +60,8 @@ void drawCorridorFront(float width, float floorY) {
         glPopMatrix();
     }
 =======
+=======
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
 	
 	// Pojok Kiri
 	glPushMatrix();
@@ -70,6 +73,9 @@ void drawCorridorFront(float width, float floorY) {
 		matConcrete();
         drawBlock(0.2f, 1.0f, 4.0f);
     glPopMatrix();
+<<<<<<< HEAD
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
+=======
 >>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
     
 <<<<<<< Updated upstream
@@ -77,9 +83,12 @@ void drawCorridorFront(float width, float floorY) {
     // Pojok Kanan
     glPushMatrix();
 <<<<<<< HEAD
+<<<<<<< HEAD
         // BUG FIX: Dipaskan sejajar tiang agar tidak memotong semen koridor
 
 =======
+=======
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
     	glTranslatef(51.8f, 0.0f, 0.0f);
         matConcrete();
         drawBlock(0.2f, 1.0f, 4.0f);
@@ -89,11 +98,15 @@ void drawCorridorFront(float width, float floorY) {
     // Balok depan
     glPushMatrix();
         glTranslatef(0.0f, 0.0f, -0.1f);
+<<<<<<< HEAD
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
+=======
 >>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
         if (alpha < 1.0f) glColor4f(0.6f, 0.6f, 0.6f, alpha);
         else { matConcrete(); }
         drawBlock(width, 1.0f, 0.2f);
     glPopMatrix();
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     // Pojok Kanan
@@ -106,10 +119,19 @@ void drawCorridorFront(float width, float floorY) {
 <<<<<<< Updated upstream
     // Pojok Kanan
     glPushMatrix();
+=======
+    
+<<<<<<< Updated upstream
+    // Pojok Kanan
+    glPushMatrix();
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
     	glEnable(GL_LIGHTING);
         glDepthMask(GL_TRUE);
     	glTranslatef(51.8f, 0.0f, 0.0f);
         matConcrete();
+<<<<<<< HEAD
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
+=======
 >>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
         drawBlock(0.2f, 1.0f, 4.0f);
     glPopMatrix();

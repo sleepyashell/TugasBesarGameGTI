@@ -11,6 +11,9 @@
 #include "Bot.h"
 =======
 #include "bot.h"
+<<<<<<< HEAD
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
+=======
 >>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
 #include "World.h" 
 
