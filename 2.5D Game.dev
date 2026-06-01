@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=58
+UnitCount=59
 
 [VersionInfo]
 Major=1
@@ -573,16 +573,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit56]
-FileName=Menu_new.cpp
-CompileCpp=1
-Folder=2.5D Game
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit57]
 FileName=Sound.cpp
 CompileCpp=1
 Folder=2.5D Game
@@ -592,12 +582,31 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit58]
+[Unit57]
 FileName=Sound.h
 CompileCpp=1
 Folder=2.5D Game
 Compile=1
 Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit58]
+FileName=backsound.wav
+CompileCpp=1
+Folder=2.5D Game
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit59]
+FileName=bellsound.wav
+Folder=2.5D Game
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
