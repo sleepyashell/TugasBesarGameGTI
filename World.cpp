@@ -243,10 +243,10 @@ void buildPhysicalWorld() {
         float yBot = f * FLOOR_HEIGHT;
         float yTop = yBot + FLOOR_HEIGHT;
 
-        // ========================================
-        // 1. DINDING BELAKANG KORIDOR (Z = 4.0)
-        // ========================================
-        registerCollider(0.0f, 4.0f, 56.0f, 0.2f, yBot, yTop);
+
+        registerCollider(0.0f,  3.9f, 52.0f, 0.2f, yBot, yTop);
+        registerCollider(0.0f, -10.0f, 52.0f, 0.2f, yBot, yTop);
+
 
         // ========================================
         // 2. DINDING BELAKANG RUANGAN (Z = -10.0)
@@ -295,7 +295,59 @@ void buildPhysicalWorld() {
         // 5. COLLIDER PINTU RUANGAN (DINAMIS)
         // ========================================
         for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
-            if (r == 3) continue; // Skip area tangga
+
+            if (lockedRooms[f][r]) {
+                // Tambahkan collider di pintu ruangan terkunci
+                registerCollider(roomDoors[r].x, roomDoors[r].z, 
+                                roomDoors[r].w, roomDoors[r].d, yBot, yTop);
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            float sx = i * 8.0f;
+            registerCollider(sx, 0.0f, 0.2f, 10.0f, yBot, yTop);
+            if (f > 0 && i == 0){
+            	registerCollider(sx,        4.0f, 0.2f, 4.0f, yBot, yTop);
+            }
+            if (i % 2 == 0) {
+                registerCollider(sx,        0.0f, 1.0f, 0.2f, yBot, yTop);
+                registerCollider(sx + 3.0f, 0.0f, 5.0f, 0.2f, yBot, yTop);
+            } else {
+                registerCollider(sx,        0.0f, 5.0f, 0.2f, yBot, yTop);
+                registerCollider(sx + 7.0f, 0.0f, 1.0f, 0.2f, yBot, yTop);
+            }
+            if (i == 3){
+            	registerCollider(sx + 7.8f, 0.0f, 0.2f, 10.0f, yBot, yTop);
+            	if (f == 0){
+            		registerCollider(sx + 10.0f, -1.0f, 0.01f, 3.5f, yBot, yTop);
+            		registerCollider(sx + 7.8f, - 4.5f, 2.0f, 0.2f, yBot, 2.4);
+            	}
+				else {
+            		registerCollider(sx + 10.0f, -1.0f, 0.01f, 3.5f, yBot, yTop);
+            		if (f == 2) {
+            			registerCollider(sx + 7.8f, -1.0f, 2.15f, 2.0f, yBot, yTop);
+            		}
+            	}
+            }
+        }
+
+        for (int i = 5; i <= 6; i++) {
+            float sx = (i - 1) * 8.0f + 4.0f;
+            registerCollider(sx, 0.0f, 0.2f, 10.0f, yBot, yTop);
+//            if (i == 5) {
+//                registerCollider(sx,        0.0f, 1.0f, 0.2f, yBot, yTop);
+//                registerCollider(sx + 3.0f, 0.0f, 5.0f, 0.2f, yBot, yTop);
+//            } else {
+//                registerCollider(sx,        0.0f, 5.0f, 0.2f, yBot, yTop);
+//                registerCollider(sx + 7.0f, 0.0f, 1.0f, 0.2f, yBot, yTop);
+//            }
+            registerCollider(sx,        0.0f, 1.0f, 0.2f, yBot, yTop);
+            registerCollider(sx + 3.0f, 0.0f, 5.0f, 0.2f, yBot, yTop);
+            if (i == 6){
+            	registerCollider(sx + 8, 0.0f, 0.2f, 10.0f, yBot, yTop);
+	            registerCollider(sx + 8,        4.0f, 0.2f, 4.0f, yBot, yTop);
+            }
+
             
             DoorInfo& door = doorInfos[r];
             

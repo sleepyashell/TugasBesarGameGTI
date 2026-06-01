@@ -83,7 +83,6 @@ void display() {
     
     drawPlayer();
     drawRuangGedung();
-    drawAllPosters();
     
     // HUD DEBUG: KOORDINAT PLAYER
     char coordsStr[64];
