@@ -4,11 +4,11 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = Material.o World.o Building.o Drawing.o Main.o Texture.o Item.o Bot.o Player.o Input.o Camera.o Lighting.o
-LINKOBJ  = Material.o World.o Building.o Drawing.o Main.o Texture.o Item.o Bot.o Player.o Input.o Camera.o Lighting.o
-LIBS     = -L"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/lib" -static-libstdc++ -static-libgcc -mwindows -lglut32 -lglu32 -lopengl32 -lwinmm -lgdi32
-INCS     = -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/include"
-CXXINCS  = -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/include"
+OBJ      = Material.o World.o Building.o Drawing.o Main.o Texture.o Item.o Bot.o Player.o Input.o Camera.o Lighting.o Menu.o Cutscene.o Sound.o
+LINKOBJ  = Material.o World.o Building.o Drawing.o Main.o Texture.o Item.o Bot.o Player.o Input.o Camera.o Lighting.o Menu.o Cutscene.o Sound.o
+LIBS     = -L"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/lib" -L"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/mingw32/lib" -static-libstdc++ -static-libgcc -mwindows -lglut32 -lglu32 -lopengl32 -lwinmm -lgdi32
+INCS     = -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/include" -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/mingw32/include" -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.8.1/include"
+CXXINCS  = -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/include" -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/mingw32/include" -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.8.1/include" -I"C:/Program Files (x86)/GibsTeam/Dev-C++ GTI MOD/Dev-Cpp/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.8.1/include/c++"
 BIN      = "2.5D Game.exe"
 CXXFLAGS = $(CXXINCS) 
 CFLAGS   = $(INCS) -DGLUT_STATIC
@@ -59,3 +59,12 @@ Camera.o: Camera.cpp
 
 Lighting.o: Lighting.cpp
 	$(CPP) -c Lighting.cpp -o Lighting.o $(CXXFLAGS)
+
+Menu.o: Menu.cpp
+	$(CPP) -c Menu.cpp -o Menu.o $(CXXFLAGS)
+
+Cutscene.o: Cutscene.cpp
+	$(CPP) -c Cutscene.cpp -o Cutscene.o $(CXXFLAGS)
+
+Sound.o: Sound.cpp
+	$(CPP) -c Sound.cpp -o Sound.o $(CXXFLAGS)
