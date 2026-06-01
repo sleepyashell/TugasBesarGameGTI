@@ -326,6 +326,9 @@ void drawAllPosters() {
 
 void initTextures() {
     
+    // Load texture dinding
+    g_textures[TEX_WALL] = loadBMP("wall.bmp");  // test dulu
+    
     // Load texture ubin lantai
     g_textures[TEX_FLOOR_TILE] = loadBMP("floor_title.bmp");
     
@@ -368,4 +371,3 @@ void cleanupTextures() {
         g_textures[i] = 0;
     }
 }
-
