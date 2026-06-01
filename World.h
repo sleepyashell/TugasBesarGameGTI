@@ -6,6 +6,7 @@
 const float FLOOR_HEIGHT = 5.0f;
 const int NUM_FLOORS = 3;
 const int NUM_ROOMS_PER_FLOOR = 6;
+extern bool lockedRooms[NUM_FLOORS][NUM_ROOMS_PER_FLOOR];
 
 struct BoundingBox {
     float xMin, xMax, zMin, zMax, yMin, yMax;

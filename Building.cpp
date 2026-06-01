@@ -152,24 +152,26 @@ void drawRoomInterior(float width, float depth) {
     matFloor();   drawBlock(width, 0.05f, depth);
     drawDeskSet(width, depth);
     
+    bindTexture(TEX_WALL);
     matConcrete();
     // Tembok Kiri
 	glPushMatrix();
 		glTranslatef(0, 0, -0.01f);
-		drawBlock(0.2f, 4.0f, 9.99f);
+		drawWallBlock(0.2f, 4.0f, 9.99f);
 	glPopMatrix();
 	
 	// Tembok Kanan
 	glPushMatrix();
 		glTranslatef(7.8f, 0, -0.01f);
-		drawBlock(0.2f, 4.0f, 9.99f);
+		drawWallBlock(0.2f, 4.0f, 9.99f);
 	glPopMatrix();
 
     // Tembok belakang
     glPushMatrix();
         glTranslatef(0, 0, -depth);
-		drawBlock(width, 4.0f, 0.2f);
+		drawWallBlock(width, 4.0f, 0.2f);
     glPopMatrix();
+    unbindTexture();
 
     // Plafon
     glPushMatrix();
@@ -196,7 +198,9 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
     }
     glPushMatrix();
         glTranslatef(0, 0, -6.5);
-        matConcrete(); drawBlock(width, FLOOR_HEIGHT, 0.2f);
+        bindTexture(TEX_WALL);
+        matConcrete(); drawWallBlock(width, FLOOR_HEIGHT, 0.2f);
+        unbindTexture();
     glPopMatrix();
 
 	if (isLastFloor) {
@@ -424,18 +428,20 @@ void drawFrontWall(float width, float depth, float startX, bool isFlipped,
             drawBlock(2.0f, 1.5f, 0.2f);
         glPopMatrix();
     } else {
+        bindTexture(TEX_WALL);
         matConcrete(); 
-        drawBlock(doorX, 4.0f, 0.2f);
+        drawWallBlock(doorX, 4.0f, 0.2f);
         glPushMatrix();
             glTranslatef(doorX + 2.0f, 0, 0);
             matConcrete(); 
-            drawBlock(width - (doorX + 2.0f), 4.0f, 0.2f);
+            drawWallBlock(width - (doorX + 2.0f), 4.0f, 0.2f);
         glPopMatrix();
         glPushMatrix();
             glTranslatef(doorX, 2.5f, 0);
             matConcrete(); 
-            drawBlock(2.0f, 1.5f, 0.2f);
+            drawWallBlock(2.0f, 1.5f, 0.2f);
         glPopMatrix();
+        unbindTexture();
     }
 
     if (alpha < 1.0f) {
