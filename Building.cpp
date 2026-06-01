@@ -49,30 +49,37 @@ void drawCorridorFront(float width, float floorY) {
         glDepthMask(GL_FALSE);
         glDisable(GL_LIGHTING);
     }
+	
+	// Pojok Kiri
+	glPushMatrix();
+		glEnable(GL_LIGHTING);
+        glDepthMask(GL_TRUE);
 
-	// 1. Pojok Kiri Lorong
-    if (floorY > 5.0f) {
-        glPushMatrix();
-            if (alpha < 1.0f) glColor4f(0.6f, 0.6f, 0.6f, alpha);
-            else { matConcrete(); }
-            drawBlock(0.2f, 1.0f, 4.0f);
-        glPopMatrix();
-    }
+		matConcrete();
+        drawBlock(0.2f, 1.0f, 4.0f);
+    glPopMatrix();
     
-    // 2. Balok Depan (Pembatas kaca koridor terluar)
+    // Pojok Kanan
     glPushMatrix();
-        // BUG FIX: Dipaskan sejajar tiang agar tidak memotong semen koridor
-
+    	glTranslatef(51.8f, 0.0f, 0.0f);
+        matConcrete();
+        drawBlock(0.2f, 1.0f, 4.0f);
+    glPopMatrix();
+    
+    // Balok depan
+    glPushMatrix();
+        glTranslatef(0.0f, 0.0f, -0.1f);
         if (alpha < 1.0f) glColor4f(0.6f, 0.6f, 0.6f, alpha);
         else { matConcrete(); }
         drawBlock(width, 1.0f, 0.2f);
     glPopMatrix();
-
+    
     // Pojok Kanan
     glPushMatrix();
-        glTranslatef(width - 0.2f, 0.0f, 0.0f);
-        if (alpha < 1.0f) glColor4f(0.6f, 0.6f, 0.6f, alpha);
-        else { matConcrete(); }
+    	glEnable(GL_LIGHTING);
+        glDepthMask(GL_TRUE);
+    	glTranslatef(51.8f, 0.0f, 0.0f);
+        matConcrete();
         drawBlock(0.2f, 1.0f, 4.0f);
     glPopMatrix();
     
@@ -141,7 +148,7 @@ void drawRoomInterior(float width, float depth) {
         glTexCoord2f(0,    vMax); glVertex3f(0,     0.05f, -depth);
     glEnd();
     
-    unbindTexture();
+    bindTexture(TEX_WALL);
     matFloor();   drawBlock(width, 0.05f, depth);
     drawDeskSet(width, depth);
     
@@ -466,8 +473,7 @@ void drawFrontWall(float width, float depth, float startX, bool isFlipped,
     }
 }
 
-void drawOneLantai(float offsetY, int currentFloor, bool hasStairDown) {
-	bool isLastFloor  = (currentFloor == NUM_FLOORS - 1);
+void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown) {
     glPushMatrix();
     glTranslatef(0, offsetY, 0);
 
@@ -499,9 +505,6 @@ void drawOneLantai(float offsetY, int currentFloor, bool hasStairDown) {
             drawFrontWall(8, 10, 44, false, offsetY);
         glPopMatrix();
         
-        for (int room = 0; room < 4; room++) {
-	        drawRoomPosters(currentFloor, room);
-	    }
         glPushMatrix();
             glTranslatef(0, 0, 4);
             drawCorridorFront(52, offsetY); // Gunakan offsetY untuk kalkulasi tekstur/posisi vertikal
@@ -511,8 +514,9 @@ void drawOneLantai(float offsetY, int currentFloor, bool hasStairDown) {
 
 void drawRuangGedung() {
     for (int f = 0; f < NUM_FLOORS; f++) {
+        bool isLastFloor  = (f == NUM_FLOORS - 1);
         bool hasStairDown = (f > 0);
-        drawOneLantai(f * FLOOR_HEIGHT, f, hasStairDown);
+        drawOneLantai(f * FLOOR_HEIGHT, isLastFloor, hasStairDown);
     }
 }
 
