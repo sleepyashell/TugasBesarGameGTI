@@ -6,267 +6,320 @@
 
 #include <cstdlib> 
 #include <cmath>    
+<<<<<<< HEAD
 
 #include "Bot.h"
+=======
+#include "bot.h"
+>>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
 #include "World.h" 
 
-// Instansiasi array hantu global untuk 3 lantai
-EnemyBot ghostBots[3];
+EnemyBot ghostBot;
 
-// =========================================================================
-// DATA ROUTING: WAYPOINTS PATROLI LORONG UTAMA (CUMA 3 NODE, ANTI-REDUNDAN)
-// =========================================================================
-const int NUM_NODES = 3;
+const int NUM_NODES = 11;
 Waypoint nodes[NUM_NODES] = {
-    { 2.0f  },  // Node 0: Ujung Kiri
-    { 33.0f },  // Node 1: Tengah Lorong (Depan Tangga)
-    { 50.0f }   // Node 2: Ujung Kanan
+    { 2.0f,  0.0f, 2.0f },   // Node 0: Lantai 1 - Ujung Kiri
+    { 33.0f, 0.0f, 2.0f },  // Node 1: Lantai 1 - Depan Tangga (Tengah)
+    { 54.0f, 0.0f, 2.0f },  // Node 2: Lantai 1 - Ujung Kanan
+    
+    { 2.0f,  4.0f, 2.0f },   // Node 3: Lantai 2 - Ujung Kiri
+    { 33.0f, 4.0f, 2.0f },  // Node 4: Lantai 2 - Depan Tangga (Tengah)
+    { 54.0f, 4.0f, 2.0f },  // Node 5: Lantai 2 - Ujung Kanan
+    
+    { 2.0f,  8.0f, 2.0f },   // Node 6: Lantai 3 - Ujung Kiri
+    { 33.0f, 8.0f, 2.0f },  // Node 7: Lantai 3 - Depan Tangga (Tengah)
+    { 54.0f, 8.0f, 2.0f },  // Node 8: Lantai 3 - Ujung Kanan
+    
+    { 34.0f, 3.2f, -6.0f }, // Node 9: Bordes Tangga Bawah (Lantai 1->2)
+    { 34.0f, 8.2f, -6.0f }  // Node 10: Bordes Tangga Atas (Lantai 2->3)
 };
 
-// =========================================================================
-// INITIALIZATION (Melahirkan Hantu Stabil di Setiap Lantai)
-// =========================================================================
 void initBot() {
-    for (int i = 0; i < 3; i++) {
-        // Hantu Lantai 2 (i == 1) bertelur di Ujung Kiri (Node 0), jalan ke Kanan
-        if (i == 1) {	
-            ghostBots[i].x = nodes[0].x;
-            ghostBots[i].dirX = 1.0f;
-            ghostBots[i].movingRight = true;
-            ghostBots[i].targetNodeIndex = 1; // Menuju tengah
-        } 
-        // Hantu Lantai 1 & 3 bertelur di Ujung Kanan (Node 2), jalan ke Kiri
-        else {
-            ghostBots[i].x = nodes[2].x;
-            ghostBots[i].dirX = -1.0f;
-            ghostBots[i].movingRight = false;
-            ghostBots[i].targetNodeIndex = 1; // Menuju tengah
-        }  
-        
-        ghostBots[i].y = (i * 5) + 0.8f; // Tinggi lantai asli kelompokmu
-        ghostBots[i].z = 2.0f;
-        ghostBots[i].speed = 0.05f;  
-        ghostBots[i].currentFloor = i;
-        ghostBots[i].isChasing = false;
-        ghostBots[i].isSearching = false;
+    ghostBot.x = nodes[0].x;    
+    ghostBot.y = 0.0f;          
+    ghostBot.z = 2.0f;          
+    ghostBot.speed = 0.05f;     
+    ghostBot.dirX = 1.0f; 
+    ghostBot.currentFloor = 0;
+    ghostBot.movingRight = true;
+    ghostBot.isChasing = false;
+    ghostBot.isSearching = false;
+    ghostBot.targetNodeIndex = 1; 
+}
+
+// =========================================================================
+// INTERPOLASI TANGGA: Mengatur Y otomatis berdasarkan kedalaman Z di tangga
+// =========================================================================
+void handleStairInterpolation() {
+    if (ghostBot.x >= 32.0f && ghostBot.x <= 36.0f && ghostBot.z < 2.0f) {
+        float base = ghostBot.currentFloor * FLOOR_HEIGHT;
+        if (ghostBot.z <= -1.0f && ghostBot.z >= -4.6f) {
+            float t = (-1.0f - ghostBot.z) / 3.6f;
+            if (t < 0.0f) t = 0.0f; if (t > 1.0f) t = 1.0f;
+            ghostBot.y = base + t * 2.4f; 
+        } else if (ghostBot.z < -4.6f && ghostBot.z >= -6.6f) {
+            ghostBot.y = base + 3.2f;      
+        }
     }
 }
 
 // =========================================================================
-// MODULE 1: SCANNING VISION ARRAY (Hanya deteksi player di koridor lantai sama)
+// SCANNING VISION: Logika deteksi player (Depan-Belakang / Sela Tangga)
 // =========================================================================
-bool scanForPlayer(int botIdx) {
-    // Kunci pembagian tinggi ubin lantai menggunakan angka 5.0f konstan
-    int playerFloor = (int)(playerY / 5.0f); 
+bool scanForPlayer() {
+    int playerFloor = (int)(playerY / FLOOR_HEIGHT);
+    float distanceX = std::abs(playerX - ghostBot.x);
+    bool playerInStairArea = (playerZ <= 0.5f && playerX >= 31.0f && playerX <= 37.0f);
 
-    // KUNCI STEALTH: Hantu hanya mendeteksi jika satu lantai dan player di koridor terbuka (playerZ >= 0.0f)
-    if (ghostBots[botIdx].currentFloor == playerFloor && playerZ >= 0.0f) {
-        float distanceX = std::abs(playerX - ghostBots[botIdx].x);
-        float toPlayerX = playerX - ghostBots[botIdx].x;
-        float dotProduct = ghostBots[botIdx].dirX * toPlayerX;
+    // Deteksi di koridor utama (Satu Lantai)
+    if (ghostBot.currentFloor == playerFloor && ghostBot.z >= 2.0f && playerZ > 0.5f) {
+        float toPlayerX = playerX - ghostBot.x;
+        float dotProduct = ghostBot.dirX * toPlayerX;
 
         if (dotProduct > 0.0f) {
-            if (distanceX < 5.0f) return true;  // Sektor pandangan depan
+            if (distanceX < 16.0f) return true;  // Sektor Depan
         } else {
-            if (distanceX < 2.5f)  return true;  // Sektor pendengaran belakang
+            if (distanceX < 4.0f)  return true;  // Sektor Belakang
         }
     } 
+    // Deteksi di sela-sela tangga dekat
+    else if (playerInStairArea && std::abs(ghostBot.currentFloor - playerFloor) <= 1) {
+        return true;
+    }
     return false;
 }
 
 // =========================================================================
-// MODULE 2: CORRIDOR PATROL ARRAY (Ronda Mandiri di Koridor Utama)
+// STATE 1: CHASE MODE (Pengejaran Agresif)
 // =========================================================================
-void executeCorridorPatrol(int botIdx) {
-    Waypoint nodeKiri  = nodes[0];
-    Waypoint nodeKanan = nodes[2];
+void executeChaseMode(int playerFloor) {
+    float distanceX = std::abs(playerX - ghostBot.x);
+    float distanceZ = std::abs(playerZ - ghostBot.z);
 
-    // AUTO-RETURN ASLI: Mundur dulu ke arah ubin koridor utama (Z = 2.0f) jika sehabis chase
-    if (ghostBots[botIdx].z < 2.0f) {
-        ghostBots[botIdx].z += ghostBots[botIdx].speed;
-        if (ghostBots[botIdx].z > 2.0f) ghostBots[botIdx].z = 2.0f;
-        return;
+    // KONDISI A: Satu lantai di koridor utama -> Terkam langsung koordinat player
+    if (ghostBot.currentFloor == playerFloor && ghostBot.z >= 2.0f && playerZ >= 2.0f) {
+        float nextX = ghostBot.x;
+        float nextZ = ghostBot.z;
+
+        if (ghostBot.x < playerX)      { nextX += ghostBot.speed; ghostBot.movingRight = true; }
+        else if (ghostBot.x > playerX) { nextX -= ghostBot.speed; ghostBot.movingRight = false; }
+        if (ghostBot.z < playerZ)       nextZ += ghostBot.speed;
+        else if (ghostBot.z > playerZ)  nextZ -= ghostBot.speed;
+
+        if (!checkCollision(nextX, ghostBot.z)) ghostBot.x = nextX;
+        if (!checkCollision(ghostBot.x, nextZ)) ghostBot.z = nextZ;
+        ghostBot.y = ghostBot.currentFloor * FLOOR_HEIGHT;
+    } 
+    // KONDISI B: Beda lantai -> Berjalan merapat menuju gerbang tangga terdekat
+    else {
+        int tanggaNodeX = (ghostBot.currentFloor == 0) ? 1 : ((ghostBot.currentFloor == 1) ? 4 : 7);
+        float targetTanggaX = nodes[tanggaNodeX].x;
+
+        if (std::abs(ghostBot.x - targetTanggaX) > 0.1f && ghostBot.z >= 2.0f) {
+            float stepX = (ghostBot.x < targetTanggaX) ? ghostBot.speed : -ghostBot.speed;
+            if (!checkCollision(ghostBot.x + stepX, ghostBot.z)) {
+                ghostBot.x += stepX;
+                ghostBot.movingRight = (stepX > 0);
+            }
+        } 
+        else {
+            // Meluncur masuk sumbu Z tangga untuk menyusul lantai player
+            if (ghostBot.currentFloor < playerFloor) {
+                ghostBot.z -= ghostBot.speed * 1.2f;
+                if (ghostBot.y >= (ghostBot.currentFloor + 1) * FLOOR_HEIGHT - 0.5f) {
+                    ghostBot.z = 2.0f;
+                    ghostBot.y = (ghostBot.currentFloor + 1) * FLOOR_HEIGHT;
+                }
+            } else {
+                ghostBot.z -= ghostBot.speed * 1.2f;
+                if (ghostBot.y <= (ghostBot.currentFloor - 1) * FLOOR_HEIGHT + 0.5f) {
+                    ghostBot.z = 2.0f;
+                    ghostBot.y = (ghostBot.currentFloor - 1) * FLOOR_HEIGHT;
+                }
+            }
+        }
     }
 
-    if (ghostBots[botIdx].movingRight) {
-        float stepX = ghostBots[botIdx].x + ghostBots[botIdx].speed;
-        if (stepX < nodeKanan.x && !checkCollision(stepX, ghostBots[botIdx].z)) {
-            ghostBots[botIdx].x = stepX;
+    // Pemicu Game Over / Tertangkap
+    if (distanceX < 0.8f && distanceZ < 1.0f && ghostBot.currentFloor == playerFloor) {
+        playerX = 33.0f; playerY = 0.8f; playerZ = 2.0f; 
+        initBot(); 
+    }
+}
+
+// =========================================================================
+// STATE 2: STAIR NAVIGATION (Sistem Gerak Naik-Turun di Dalam Tangga)
+// =========================================================================
+void executeStairPatrol() {
+	
+    ghostBot.x = 33.0f; 
+    bool mauNaik = (ghostBot.currentFloor < 2 && ghostBot.movingRight);
+
+    if (mauNaik) {
+        if (ghostBot.targetNodeIndex != 100) {
+            ghostBot.targetNodeIndex = 99; 
+            ghostBot.z -= ghostBot.speed * 1.2f;
+            if (ghostBot.z <= -5.3f) { ghostBot.z = -5.3f; ghostBot.targetNodeIndex = 100; }
         } else {
-            ghostBots[botIdx].movingRight = false;
+            ghostBot.z += ghostBot.speed * 1.2f;
+            float base = ghostBot.currentFloor * FLOOR_HEIGHT;
+            float t = (ghostBot.z - (-5.3f)) / 7.3f;
+            if (t < 0.0f) t = 0.0f; if (t > 1.0f) t = 1.0f;
+            ghostBot.y = base + 2.4f + (t * 1.6f);
+        }
+
+        if (ghostBot.z >= 2.0f) {
+            int nextFloor = ghostBot.currentFloor + 1;
+            ghostBot.z = 2.0f; ghostBot.y = nextFloor * FLOOR_HEIGHT; ghostBot.x = 36.0f;
+            ghostBot.movingRight = true;
+            ghostBot.targetNodeIndex = nextFloor * 3 + 1; 
+        }
+    } 
+    else {
+        if (ghostBot.targetNodeIndex != 100) {
+            ghostBot.targetNodeIndex = 99;
+            ghostBot.z -= ghostBot.speed * 1.2f;
+            float base = ghostBot.currentFloor * FLOOR_HEIGHT;
+            float t = (2.0f - ghostBot.z) / 7.3f;
+            if (t < 0.0f) t = 0.0f; if (t > 1.0f) t = 1.0f;
+            ghostBot.y = base - (t * 1.6f);
+
+            if (ghostBot.z <= -5.3f) { ghostBot.z = -5.3f; ghostBot.targetNodeIndex = 100; }
+        } else {
+            ghostBot.z += ghostBot.speed * 1.2f;
+        }
+
+        if (ghostBot.z >= 2.0f) {
+            int nextFloor = ghostBot.currentFloor - 1;
+            ghostBot.z = 2.0f; ghostBot.y = nextFloor * FLOOR_HEIGHT; ghostBot.x = 30.0f;
+            ghostBot.movingRight = false;
+            ghostBot.targetNodeIndex = nextFloor * 3 + 1; 
+        }
+    }
+}
+
+// =========================================================================
+// STATE 3: CORRIDOR MOVEMENT (Mondar-mandir di Lorong Utama Lantai Aktif)
+// =========================================================================
+void executeCorridorPatrol(int baseIndex) {
+    Waypoint nodeKiri  = nodes[baseIndex];
+    Waypoint nodeKanan = nodes[baseIndex + 2];
+
+    if (ghostBot.movingRight) {
+        float stepX = ghostBot.x + ghostBot.speed;
+        if (stepX < nodeKanan.x && !checkCollision(stepX, ghostBot.z)) {
+            ghostBot.x = stepX;
+        } else {
+            ghostBot.movingRight = false;
         }
     } else {
-        float stepX = ghostBots[botIdx].x - ghostBots[botIdx].speed;
-        if (stepX > nodeKiri.x && !checkCollision(stepX, ghostBots[botIdx].z)) {
-            ghostBots[botIdx].x = stepX;
+        float stepX = ghostBot.x - ghostBot.speed;
+        if (stepX > nodeKiri.x && !checkCollision(stepX, ghostBot.z)) {
+            ghostBot.x = stepX;
         } else {
-            ghostBots[botIdx].movingRight = true;
+            ghostBot.movingRight = true;
+        }
+    }
+
+    // Saklar Reset targetNodeIndex setelah masa razia Searching selesai
+    if (ghostBot.targetNodeIndex != -1) {
+        Waypoint currentTarget = nodes[ghostBot.targetNodeIndex];
+        if (std::abs(ghostBot.x - currentTarget.x) < 0.4f) {
+            if (ghostBot.isSearching) {
+                ghostBot.isSearching = false;
+                ghostBot.speed = 0.05f; 
+            }
+            ghostBot.targetNodeIndex = baseIndex + 1; 
         }
     }
 }
 
 // =========================================================================
-// MODULE 3: DIRECT CHASE STATE ARRAY (Anti-Nyangkut Masuk & Keluar Kelas)
+// SYSTEM: PEMICU MASUK TANGGA
 // =========================================================================
-void executeChaseMode(int botIdx, int playerFloor) {
-    float distanceX = std::abs(playerX - ghostBots[botIdx].x);
-    float distanceZ = std::abs(playerZ - ghostBots[botIdx].z);
-
-    if (ghostBots[botIdx].currentFloor == playerFloor) {
-        float nextX = ghostBots[botIdx].x;
-        float nextZ = ghostBots[botIdx].z;
+void checkStairTrigger(int playerFloor, int baseIndex) {
+    if (ghostBot.x >= 32.8f && ghostBot.x <= 33.2f) {
         
-        // Hitung indeks ruangan berdasarkan posisi player saat ini
-        int roomIndex = (int)(playerX / 8.0f);
-        
-        // JIKA target player di dalam kelas, tapi hantu ke-i posisinya di luar ruangan
-        if (roomIndex != 1 && roomIndex != 3 && roomIndex >= 4) {
-            // Biar fleksibel, kalau bot di dalam kelas tapi player di luar, roomIndex-nya pakai posisi bot sendiri
-            if (ghostBots[botIdx].z < 0.0f && playerZ >= 0.0f) {
-                roomIndex = (int)(ghostBots[botIdx].x / 8.0f);
-            }
-        }
-
-        // Ambil titik koordinat pintu asli sesuai struktur gedung kelompokmu
-        float targetDoorX = roomIndex * 8.0f + 2.0f;
-        if (roomIndex == 1 || roomIndex == 3) {
-            targetDoorX = roomIndex * 8.0f + 6.0f;
-        }
-        if (roomIndex >= 4) {
-            float actualX = (roomIndex) * 8.0f + 4.0f;
-            targetDoorX = actualX + 2.0f;
-        }
-
-        // ----------------------------------------------------------------=
-        // KONDISI A: PROSES MASUK (Player di dalam kelas [Z < 0], Bot di koridor [Z >= 0])
-        // ----------------------------------------------------------------=
-        if (playerZ < 0.0f && ghostBots[botIdx].z >= 0.0f) {
-            // GAYA KAKU: Selesaikan meluruskan sumbu X dulu sampai pas di pintu
-            if (std::abs(ghostBots[botIdx].x - targetDoorX) > 0.1f) {
-                if (ghostBots[botIdx].x < targetDoorX)      { nextX += ghostBots[botIdx].speed; ghostBots[botIdx].movingRight = true; }
-                else if (ghostBots[botIdx].x > targetDoorX) { nextX -= ghostBots[botIdx].speed; ghostBots[botIdx].movingRight = false; }
-            } 
-            // Setelah X benar-benar sejajar pintu, baru menusuk lurus masuk sumbu Z kelas
-            else if (ghostBots[botIdx].z > 0.0f) {
-                nextZ -= ghostBots[botIdx].speed;
-            }
-        }
-        // ----------------------------------------------------------------=
-        // KONDISI B: PROSES KELUAR (Player sudah di koridor [Z >= 0], Bot masih di kelas [Z < 0])
-        // ----------------------------------------------------------------=
-        else if (playerZ >= 0.0f && ghostBots[botIdx].z < 0.0f) {
-            // GAYA KAKU: Kunci posisi X hantu di dalam kelas agar berjalan lurus ke arah lubang pintu keluar dahulu
-            if (std::abs(ghostBots[botIdx].x - targetDoorX) > 0.1f) {
-                if (ghostBots[botIdx].x < targetDoorX)      { nextX += ghostBots[botIdx].speed; ghostBots[botIdx].movingRight = true; }
-                else if (ghostBots[botIdx].x > targetDoorX) { nextX -= ghostBots[botIdx].speed; ghostBots[botIdx].movingRight = false; }
-            }
-            // Setelah sejajar dengan lubang pintu keluar, baru dorong sumbu Z maju lurus ke koridor utama
-            else if (ghostBots[botIdx].z < 2.0f) {
-                nextZ += ghostBots[botIdx].speed;
-            }
-        }
-        // ----------------------------------------------------------------=
-        // KONDISI C: SAMA-SAMA DI KORIDOR / SAMA-SAMA DI DALAM KELAS
-        // ----------------------------------------------------------------=
-        else {
-            if (ghostBots[botIdx].x < playerX)      { nextX += ghostBots[botIdx].speed; ghostBots[botIdx].movingRight = true; }
-            else if (ghostBots[botIdx].x > playerX) { nextX -= ghostBots[botIdx].speed; ghostBots[botIdx].movingRight = false; }
+        // JIKA sedang memburu player (Chase atau Searching)
+        if (ghostBot.isChasing || ghostBot.isSearching) {
             
-            if (ghostBots[botIdx].z < playerZ)       nextZ += ghostBots[botIdx].speed;
-            else if (ghostBots[botIdx].z > playerZ)  nextZ -= ghostBots[botIdx].speed;
+            // PERBAIKAN BUG: Hanya belok masuk tangga jika lantai player BENAR-BENAR BERBEDA!
+            if (playerFloor > ghostBot.currentFloor && ghostBot.currentFloor < 2) {
+                ghostBot.movingRight = true; 
+                ghostBot.z = 1.9f; 
+            } 
+            else if (playerFloor < ghostBot.currentFloor && ghostBot.currentFloor > 0) {
+                ghostBot.movingRight = false; 
+                ghostBot.z = 1.9f;
+            }
+            // Jika player satu lantai, bot tetap lurus mengabaikan lubang tangga!
+        } 
+        // JIKA patroli biasa (Sembunyi aman)
+        else {
+            // Beri kesempatan 30% saja untuk naik/turun lantai saat patroli biar gak mondar-mandir tangga terus
+            if (rand() % 100 < 30) {
+                if (ghostBot.movingRight && ghostBot.currentFloor < 2) {
+                    ghostBot.z = 1.9f; 
+                } 
+                else if (!ghostBot.movingRight && ghostBot.currentFloor > 0) {
+                    ghostBot.z = 1.9f; 
+                }
+            }
         }
-
-        // Cek benturan rintangan global
-        if (!checkCollision(nextX, ghostBots[botIdx].z)) ghostBots[botIdx].x = nextX;
-        if (!checkCollision(ghostBots[botIdx].x, nextZ)) ghostBots[botIdx].z = nextZ;
-    }
-
-    // Pemicu Game Over / Reset total
-    if (distanceX < 0.8f && distanceZ < 1.0f && ghostBots[botIdx].currentFloor == playerFloor) {
-        playerX = 33.0f; playerY = 0.8f; playerZ = 2.0f;
-        initBot(); // Reset posisi ketiga hantu kembali tertib ke pos asalnya masing-masing
     }
 }
 
 // =========================================================================
-// CORE FUNCTION: LOOP UPDATE UTAMA (PROSES PARAREL 3 LANTAI)
+// CORE FUNCTION: UPDATE LOOP UTAMA (Sangat Ringkas & Rapi)
 // =========================================================================
 void updateBot() {
-    // Kunci pendeteksi lantai dasar player konstan dibagi 5.0f
-    int playerFloor = (int)(playerY / 5.0f); 
+    int playerFloor = (int)(playerY / FLOOR_HEIGHT);
+    ghostBot.currentFloor = (int)(ghostBot.y / FLOOR_HEIGHT);
+    ghostBot.dirX = (ghostBot.movingRight) ? 1.0f : -1.0f;
+    
+    int baseIndex = ghostBot.currentFloor * 3; 
 
-    // Looping untuk memproses state mesin masing-masing hantu L1, L2, dan L3
-    for (int i = 0; i < 3; i++) {
-        ghostBots[i].dirX = (ghostBots[i].movingRight) ? 1.0f : -1.0f;
-        
-        float dX = playerX - ghostBots[i].x;
-        float dZ = playerZ - ghostBots[i].z;
-        float totalDistance = sqrtf(dX * dX + dZ * dZ);
+    // 1. Jalankan sinkronisasi ketinggian tanjakan tangga
+    handleStairInterpolation();
 
-        if (ghostBots[i].isChasing) {
-            int playerFloorNow = (int)(playerY / 5.0f); 
-            
-            // PROTEKSI AREA TANGGA ASLI: 
-            // Titik tengah tangga berada di poros X = 32..36, dan ubinnya masuk ke sumbu Z negatif (< 0.8f)
-            bool playerInStairArea = (playerX >= 32.0f && playerX <= 36.0f && playerZ < 0.8f);
+    // 2. Scan pandangan mata bot terhadap posisi player
+    bool playerSpotted = scanForPlayer();
 
-            // STOP CONDITION A & C: Player ganti lantai ATAU masuk area tangga -> Hantu lepas kendali
-            if (ghostBots[i].currentFloor != playerFloorNow || playerInStairArea) {
-                ghostBots[i].isChasing = false;
-                ghostBots[i].isSearching = false; // Langsung matikan agar bot langsung berjalan mundur ke koridor
-                ghostBots[i].speed = 0.05f;
-            }
-            // STOP CONDITION B ASLI: Jarak player kabur sembunyi melebihi batas 8.0f unit
-            else if (totalDistance > 8.0f) {
-                ghostBots[i].isChasing = false;    // <<< HANTU BERHENTI NGEJAR!
-                ghostBots[i].isSearching = false;
-                ghostBots[i].speed = 0.05f;
-            }
-        } 
-        else {
-            bool playerSpotted = scanForPlayer(i);
+    // 3. Atur transisi status/state AI
+    if (playerSpotted) {
+        ghostBot.isChasing = true;
+        ghostBot.isSearching = false;
+        ghostBot.speed = 0.07f; 
+    } else if (ghostBot.isChasing) {
+        ghostBot.isChasing = false;
+        ghostBot.isSearching = true; 
+        ghostBot.speed = 0.07f;      
+        ghostBot.targetNodeIndex = baseIndex + (ghostBot.movingRight ? 2 : 0);
+    }
 
-            if (playerSpotted) {
-                ghostBots[i].isChasing = true;
-                ghostBots[i].isSearching = false;
-                ghostBots[i].speed = 0.065f; // Lari memburu player
-            } else if (ghostBots[i].isSearching) {
-                ghostBots[i].isSearching = false;
-            }
-        }
-
-        // Eksekusi pergerakan hantu lantai i berdasarkan state-nya
-        if (ghostBots[i].isChasing) {
-            executeChaseMode(i, playerFloor);
-        } 
-        else {
-            executeCorridorPatrol(i);
-        }
+    // 4. EKSEKUSI BEHAVIOR BERDASARKAN STATE AKTIF
+    if (ghostBot.isChasing) {
+        executeChaseMode(playerFloor);
+    } 
+    else if (ghostBot.z < 2.0f) {
+        executeStairPatrol();
+    } 
+    else {
+        executeCorridorPatrol(baseIndex);
+        checkStairTrigger(playerFloor, baseIndex);
     }
 }
 
-// =========================================================================
-// RENDER GRAPHIC ARRAY
-// =========================================================================
 void drawBot() {
-    glEnable(GL_COLOR_MATERIAL);
-    
-    for (int i = 0; i < 3; i++) {
+    glPushMatrix();
+        glTranslatef(ghostBot.x, ghostBot.y + 1.0f, ghostBot.z); 
+        glEnable(GL_COLOR_MATERIAL); 
+        if (ghostBot.isChasing && (int)(glutGet(GLUT_ELAPSED_TIME) / 100) % 2 == 0) glColor3f(1.0f, 1.0f, 0.0f); 
+        else glColor3f(0.6f, 0.0f, 0.0f); 
         glPushMatrix();
-            glTranslatef(ghostBots[i].x, ghostBots[i].y, ghostBots[i].z);
-            
-            if (ghostBots[i].isChasing && (int)(glutGet(GLUT_ELAPSED_TIME) / 100) % 2 == 0) {
-                glColor3f(1.0f, 1.0f, 0.0f);
-            } else { 
-                glColor3f(0.5f, 0.0f, 0.0f);
-            }
-            
-            glPushMatrix();
-                glScalef(0.6f, 1.5f, 0.6f);
-                glutSolidCube(1.0f);
-            glPopMatrix();
+            glScalef(0.6f, 1.5f, 0.6f);
+            glutSolidCube(1.0f);
         glPopMatrix();
-    }
-    
-    glDisable(GL_COLOR_MATERIAL);
+        glDisable(GL_COLOR_MATERIAL);
+    glPopMatrix();
 }

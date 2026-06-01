@@ -287,7 +287,7 @@ void drawRoomPosters(int f, int roomIndex) {
 
     float pw = 1.5f;                
     float ph = 2.0f;                
-    float pz = 0.05f;               
+    float pz = 0.25f;               
 
     GLuint texID = g_posterTex[roomIndex % NUM_POSTERS];
     if (texID == 0) return;  
