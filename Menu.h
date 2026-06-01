@@ -28,5 +28,6 @@ void handleMenuInput(int key);
 void handleMouseClick(int button, int state, int x, int y);
 void resetMenu();
 void cleanupMenuTextures();
+void startIntroDialog();
 
 #endif

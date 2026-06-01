@@ -8,19 +8,20 @@
 #include <cstdlib>
 #include "Menu.h"
 #include "Texture.h"
+#include "Cutscene.h"
+#include "Sound.h"
 
 GameState gameState = STATE_MENU;
 int selectedMenuItem = 0;
 
-// Forward declaration from Main.cpp
-extern void startIntroDialog();
+// Hanya 2 texture yang diperlukan
 GLuint menuPlayHighlightTex = 0;
 GLuint menuExitHighlightTex = 0;
 
 void loadMenuTextures() {
     // Hanya load 2 file yang sudah Anda sediakan
-    menuPlayHighlightTex = loadBMP("Assets\\menuplayhighlight.bmp");
-    menuExitHighlightTex = loadBMP("Assets\\menuexithighlight.bmp");
+    menuPlayHighlightTex = loadBMP("Assets/menuplayhighlight.bmp");
+    menuExitHighlightTex = loadBMP("Assets/menuexithighlight.bmp");
 }
 
 void cleanupMenuTextures() {
@@ -112,8 +113,9 @@ void handleMenuInput(int key) {
             
         case 13:  // ENTER
             if (selectedMenuItem == 0) {
-                startIntroDialog();
                 gameState = STATE_PLAYING;
+                startIntroDialog();
+                soundManager.playSound(SOUND_BELL);
             } else if (selectedMenuItem == 1) {
                 cleanupMenuTextures();
                 exit(0);
@@ -133,7 +135,6 @@ void handleMouseClick(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         // Area Play (perkiraan, sesuaikan dengan posisi tombol di gambar Anda)
         if (y >= 250 && y <= 380 && x >= 450 && x <= 830) {
-            startIntroDialog();
             gameState = STATE_PLAYING;
         }
         // Area Exit

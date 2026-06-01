@@ -169,9 +169,6 @@ void init() {
     
     // Inisialisasi menu
     initMenu();
-    
-    // Play background music (commented to avoid startup issues)
-    // soundManager.playSound(SOUND_BACKGROUND);
 }
 
 

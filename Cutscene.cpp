@@ -40,6 +40,8 @@ void CutsceneManager::stopCutscene() {
     hasPlayedBell = false;
     waitingForInput = false;
     dialogLines.clear();
+    soundManager.stopSound(SOUND_BELL);
+    soundManager.playSound(SOUND_BACKGROUND);
 }
 
 void CutsceneManager::advanceDialog() {

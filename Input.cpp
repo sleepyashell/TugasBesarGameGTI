@@ -9,6 +9,7 @@
 #include "Input.h"
 #include "World.h"
 #include "Cutscene.h"
+#include "Menu.h"
 
 extern float playerX;
 extern float playerZ;
@@ -24,11 +25,11 @@ int deltaMoveZ = 0;
 
 void pressNormalKeys(unsigned char key, int x, int y) {
     // Handle cutscene ENTER input
-    if (cutsceneManager.isRunning()) {
-        if (key == 13) {  // ENTER key
+    if (key == 13) {  // ENTER
+        if (cutsceneManager.isRunning()) {
             cutsceneManager.advanceDialog();
+            return;
         }
-        return;  // Disable all other input during cutscene
     }
     
     switch (key) {

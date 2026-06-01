@@ -311,6 +311,7 @@ void updateBot() {
 
         // Play chase sound when spotted
         if (!isChaseSoundPlaying) {
+        	soundManager.stopSound(SOUND_BACKGROUND);
             soundManager.playSound(SOUND_CHASE);
             isChaseSoundPlaying = true;
         }
@@ -323,6 +324,7 @@ void updateBot() {
         // Stop chase sound when not chasing anymore
         if (isChaseSoundPlaying) {
             soundManager.stopSound(SOUND_CHASE);
+            soundManager.playSound(SOUND_BACKGROUND);
             isChaseSoundPlaying = false;
 
             // PERBAIKAN KRUSIAL: Restart backsound setelah chase berakhir
