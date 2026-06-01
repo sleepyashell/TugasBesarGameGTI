@@ -6,25 +6,29 @@
 
 #include <cstdlib> 
 #include <cmath>    
+#include <cstdio>
 #include "Bot.h"
-#include "World.h" 
+#include "World.h"
+#include "Sound.h"
+#include "Cutscene.h"
 
 EnemyBot ghostBot;
+bool isChaseSoundPlaying = false;
 
 const int NUM_NODES = 11;
 Waypoint nodes[NUM_NODES] = {
     { 2.0f,  0.0f, 2.0f },   // Node 0: Lantai 1 - Ujung Kiri
     { 33.0f, 0.0f, 2.0f },  // Node 1: Lantai 1 - Depan Tangga (Tengah)
-    { 54.0f, 0.0f, 2.0f },  // Node 2: Lantai 1 - Ujung Kanan
-    
+    { 50.0f, 0.0f, 2.0f },  // Node 2: Lantai 1 - Ujung Kanan (FIXED: 50 bukan 54)
+
     { 2.0f,  4.0f, 2.0f },   // Node 3: Lantai 2 - Ujung Kiri
     { 33.0f, 4.0f, 2.0f },  // Node 4: Lantai 2 - Depan Tangga (Tengah)
-    { 54.0f, 4.0f, 2.0f },  // Node 5: Lantai 2 - Ujung Kanan
-    
+    { 50.0f, 4.0f, 2.0f },  // Node 5: Lantai 2 - Ujung Kanan (FIXED: 50 bukan 54)
+
     { 2.0f,  8.0f, 2.0f },   // Node 6: Lantai 3 - Ujung Kiri
     { 33.0f, 8.0f, 2.0f },  // Node 7: Lantai 3 - Depan Tangga (Tengah)
-    { 54.0f, 8.0f, 2.0f },  // Node 8: Lantai 3 - Ujung Kanan
-    
+    { 50.0f, 8.0f, 2.0f },  // Node 8: Lantai 3 - Ujung Kanan (FIXED: 50 bukan 54)
+
     { 34.0f, 3.2f, -6.0f }, // Node 9: Bordes Tangga Bawah (Lantai 1->2)
     { 34.0f, 8.2f, -6.0f }  // Node 10: Bordes Tangga Atas (Lantai 2->3)
 };
@@ -146,7 +150,7 @@ void executeChaseMode(int playerFloor) {
 // STATE 2: STAIR NAVIGATION (Sistem Gerak Naik-Turun di Dalam Tangga)
 // =========================================================================
 void executeStairPatrol() {
-	
+
     ghostBot.x = 33.0f; 
     bool mauNaik = (ghostBot.currentFloor < 2 && ghostBot.movingRight);
 
@@ -234,10 +238,10 @@ void executeCorridorPatrol(int baseIndex) {
 // =========================================================================
 void checkStairTrigger(int playerFloor, int baseIndex) {
     if (ghostBot.x >= 32.8f && ghostBot.x <= 33.2f) {
-        
+
         // JIKA sedang memburu player (Chase atau Searching)
         if (ghostBot.isChasing || ghostBot.isSearching) {
-            
+
             // PERBAIKAN BUG: Hanya belok masuk tangga jika lantai player BENAR-BENAR BERBEDA!
             if (playerFloor > ghostBot.currentFloor && ghostBot.currentFloor < 2) {
                 ghostBot.movingRight = true; 
@@ -268,11 +272,30 @@ void checkStairTrigger(int playerFloor, int baseIndex) {
 // CORE FUNCTION: UPDATE LOOP UTAMA (Sangat Ringkas & Rapi)
 // =========================================================================
 void updateBot() {
+    // Skip bot update during cutscene
+    if (cutsceneManager.isRunning()) {
+        return;
+    }
+
     int playerFloor = (int)(playerY / FLOOR_HEIGHT);
     ghostBot.currentFloor = (int)(ghostBot.y / FLOOR_HEIGHT);
     ghostBot.dirX = (ghostBot.movingRight) ? 1.0f : -1.0f;
-    
-    int baseIndex = ghostBot.currentFloor * 3; 
+
+    int baseIndex = ghostBot.currentFloor * 3;
+
+    // PERBAIKAN: Clamp Y agar tidak jatuh ke bawah tanah
+    float minY = ghostBot.currentFloor * FLOOR_HEIGHT;
+    float maxY = (ghostBot.currentFloor + 1) * FLOOR_HEIGHT;
+    if (ghostBot.y < minY) ghostBot.y = minY;
+    if (ghostBot.y > maxY + 1.0f) ghostBot.y = maxY;
+
+    // PERBAIKAN: Clamp X agar tidak keluar gedung
+    if (ghostBot.x < 1.0f) ghostBot.x = 1.0f;
+    if (ghostBot.x > 51.0f) ghostBot.x = 51.0f;
+
+    // PERBAIKAN: Clamp Z
+    if (ghostBot.z < -6.6f) ghostBot.z = -6.6f;
+    if (ghostBot.z > 4.0f) ghostBot.z = 4.0f;
 
     // 1. Jalankan sinkronisasi ketinggian tanjakan tangga
     handleStairInterpolation();
@@ -284,12 +307,27 @@ void updateBot() {
     if (playerSpotted) {
         ghostBot.isChasing = true;
         ghostBot.isSearching = false;
-        ghostBot.speed = 0.07f; 
+        ghostBot.speed = 0.07f;
+
+        // Play chase sound when spotted
+        if (!isChaseSoundPlaying) {
+            soundManager.playSound(SOUND_CHASE);
+            isChaseSoundPlaying = true;
+        }
     } else if (ghostBot.isChasing) {
         ghostBot.isChasing = false;
         ghostBot.isSearching = true; 
         ghostBot.speed = 0.07f;      
         ghostBot.targetNodeIndex = baseIndex + (ghostBot.movingRight ? 2 : 0);
+
+        // Stop chase sound when not chasing anymore
+        if (isChaseSoundPlaying) {
+            soundManager.stopSound(SOUND_CHASE);
+            isChaseSoundPlaying = false;
+
+            // PERBAIKAN KRUSIAL: Restart backsound setelah chase berakhir
+            soundManager.restartBackgroundIfNeeded();
+        }
     }
 
     // 4. EKSEKUSI BEHAVIOR BERDASARKAN STATE AKTIF
@@ -302,6 +340,15 @@ void updateBot() {
     else {
         executeCorridorPatrol(baseIndex);
         checkStairTrigger(playerFloor, baseIndex);
+    }
+
+    // DEBUG: Print posisi bot setiap 60 frame (sekitar 1 detik)
+    static int debugCounter = 0;
+    if (++debugCounter >= 60) {
+        debugCounter = 0;
+        printf("[BOT DEBUG] x=%.2f y=%.2f z=%.2f floor=%d chasing=%d\n",
+               ghostBot.x, ghostBot.y, ghostBot.z, 
+               ghostBot.currentFloor, ghostBot.isChasing ? 1 : 0);
     }
 }
 

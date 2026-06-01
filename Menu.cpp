@@ -12,7 +12,8 @@
 GameState gameState = STATE_MENU;
 int selectedMenuItem = 0;
 
-// Hanya 2 texture yang diperlukan
+// Forward declaration from Main.cpp
+extern void startIntroDialog();
 GLuint menuPlayHighlightTex = 0;
 GLuint menuExitHighlightTex = 0;
 
@@ -111,6 +112,7 @@ void handleMenuInput(int key) {
             
         case 13:  // ENTER
             if (selectedMenuItem == 0) {
+                startIntroDialog();
                 gameState = STATE_PLAYING;
             } else if (selectedMenuItem == 1) {
                 cleanupMenuTextures();
@@ -131,6 +133,7 @@ void handleMouseClick(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         // Area Play (perkiraan, sesuaikan dengan posisi tombol di gambar Anda)
         if (y >= 250 && y <= 380 && x >= 450 && x <= 830) {
+            startIntroDialog();
             gameState = STATE_PLAYING;
         }
         // Area Exit

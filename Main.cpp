@@ -21,6 +21,8 @@
 #include "Camera.h"
 #include "Lighting.h"
 #include "Menu.h"
+#include "Sound.h"
+#include "Cutscene.h"
 
 using namespace std;
 
@@ -37,6 +39,7 @@ bool  isWalking    = false;
 vector<BoundingBox> colliders;
 
 bool isDoorOpen = false;
+bool introPlayed = false;
 
 
 void drawHUDText(float x, float y, const char* text) {
@@ -69,6 +72,18 @@ void drawHUDText(float x, float y, const char* text) {
     glEnable(GL_LIGHTING);
 }
 
+void startIntroDialog() {
+    if (introPlayed) return;
+    
+    cutsceneManager.addDialogLine("Kamu bangun di tempat yang gelap...", 3.0f, true);
+    cutsceneManager.addDialogLine("Dimana aku? Ini... dimana?", 3.0f, true);
+    cutsceneManager.addDialogLine("Ada seseorang di sini...", 3.0f, true);
+    cutsceneManager.addDialogLine("Aku harus pergi dari sini!", 2.5f, false);
+    
+    cutsceneManager.startCutscene();
+    introPlayed = true;
+}
+
 void display() {
     if (gameState == STATE_MENU) {
         drawMenu();
@@ -99,6 +114,12 @@ void display() {
         sprintf(floorStr, "LANTAI: %d", currentFloor);
         drawHUDText(2.0f, 91.0f, floorStr);
         drawItemHUD();
+        
+        // Render cutscene dialog if active
+        if (cutsceneManager.isRunning()) {
+            cutsceneManager.render();
+        }
+        
         glutSwapBuffers();
     }
 }
@@ -111,6 +132,10 @@ void update(int v) {
     bool animChanged = updateDoorAnimations(0.016f);
     checkDoorProximity();
     buildPhysicalWorld();
+    
+    // Update cutscene
+    cutsceneManager.update(0.016f);
+    
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
     updateBot();
@@ -127,6 +152,9 @@ void init() {
     initPosters();
     srand(time(0));
     
+    // Initialize sound manager
+    soundManager.initialize();
+    
     // Random door state saat game start
     isDoorOpen = (rand() % 2) == 0;
     
@@ -141,6 +169,9 @@ void init() {
     
     // Inisialisasi menu
     initMenu();
+    
+    // Play background music (commented to avoid startup issues)
+    // soundManager.playSound(SOUND_BACKGROUND);
 }
 
 
