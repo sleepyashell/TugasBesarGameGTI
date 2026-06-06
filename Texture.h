@@ -11,34 +11,23 @@
 #include "World.h"
 
 enum TextureID {
-    TEX_FLOOR_TILE = 0,   // floor_title.bmp - ubin lantai
-    TEX_WALL,             // wall.bmp - texture dinding
-    TEX_POSTER_1,         // poster1.bmp
-    TEX_POSTER_2,         // poster2.bmp
-    TEX_POSTER_3,         // poster3.bmp
-    TEX_POSTER_4,         // poster4.bmp
+    TEX_FLOOR_TILE = 0,   
+    TEX_WALL,             
+    TEX_POSTER_1,         
+    TEX_POSTER_2,         
+    TEX_POSTER_3,         
+    TEX_POSTER_4,         
+    TEX_GROUND,
     NUM_TEXTURES
 };
 
-// ==========================================
-// TEXTURE MANAGER
-// ==========================================
-
 GLuint loadBMP(const char* filename);
-
 void initTextures();
 void bindTexture(TextureID texID);
 void unbindTexture();
 void cleanupTextures();
-
-// ==========================================
-// POSTER
-// ==========================================
-
 void drawPoster(float x, float y, float z, float w, float h, char axis, GLuint texID, float alpha = 1.0f);
 void initPosters();
 void drawRoomPosters(int f, int roomIndex);
-void drawFloorPosters(int f);
-void drawAllPosters();
 
 #endif

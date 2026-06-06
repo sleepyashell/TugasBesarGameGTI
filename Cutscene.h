@@ -1,3 +1,9 @@
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 #ifndef CUTSCENE_H
 #define CUTSCENE_H
 
@@ -18,7 +24,7 @@ private:
     float elapsedTime;
     bool isActive;
     bool hasPlayedBell;
-    bool waitingForInput;  // Wait for ENTER key
+    bool waitingForInput;  
     
 public:
     CutsceneManager();
@@ -29,8 +35,7 @@ public:
     void stopCutscene();
     void update(float deltaTime);
     void render();
-    void advanceDialog();  // Called when ENTER pressed
-    
+    void advanceDialog();  
     bool isRunning() const;
     bool isWaitingForInput() const;
     const char* getCurrentDialogText() const;

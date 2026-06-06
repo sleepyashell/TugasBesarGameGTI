@@ -11,15 +11,28 @@
 
 SoundManager soundManager;
 
-SoundManager::SoundManager() : soundsInitialized(false) {
-    // Inisialisasi map manual untuk C++98
-    soundPIDs[SOUND_BELL] = -1;
-    soundPIDs[SOUND_BACKGROUND] = -1;
-    soundPIDs[SOUND_CHASE] = -1;
+#ifdef _WIN32
 
-    soundPlaying[SOUND_BELL] = false;
+static std::string getSoundPath(const char* filename) {
+    char exePath[MAX_PATH];
+    GetModuleFileNameA(NULL, exePath, MAX_PATH);
+    
+    char* lastSlash = strrchr(exePath, '\\');
+    if (lastSlash) *(lastSlash + 1) = '\0';
+    return std::string(exePath) + "Sound\\" + filename;
+}
+#endif
+
+SoundManager::SoundManager() : soundsInitialized(false) {
+    soundPIDs[SOUND_BELL]       = -1;
+    soundPIDs[SOUND_BACKGROUND] = -1;
+    soundPIDs[SOUND_CHASE]      = -1;
+    soundPIDs[SOUND_JUMPSCARE]  = -1;
+
+    soundPlaying[SOUND_BELL]       = false;
     soundPlaying[SOUND_BACKGROUND] = false;
-    soundPlaying[SOUND_CHASE] = false;
+    soundPlaying[SOUND_CHASE]      = false;
+    soundPlaying[SOUND_JUMPSCARE]  = false;
 }
 
 SoundManager::~SoundManager() {
@@ -41,54 +54,47 @@ bool SoundManager::isPlaying(SoundType type) {
 void SoundManager::playSound(SoundType type) {
     if (!soundsInitialized) return;
 
-    // Jika suara ini sudah diputar, jangan diputar ulang
     if (isPlaying(type)) return;
 
     #ifdef _WIN32
+        std::string path;
         switch(type) {
             case SOUND_BELL:
-                PlaySoundA("Sound\\bellsound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                path = getSoundPath("bellsound.wav");
+                PlaySoundA(path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
                 break;
             case SOUND_BACKGROUND:
-                PlaySoundA("Sound\\backsound.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+                path = getSoundPath("backsound.wav");
+                PlaySoundA(path.c_str(), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
                 break;
             case SOUND_CHASE:
-                PlaySoundA("Sound\\chasesound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                path = getSoundPath("chasesound.wav");
+                PlaySoundA(path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
+                break;
+            case SOUND_JUMPSCARE:
+                path = getSoundPath("JumpscareSound.wav");
+                PlaySoundA(path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
                 break;
         }
+        printf("[Sound] Playing: %s\n", path.c_str());
         soundPlaying[type] = true;
     #else
-        // Mac/Linux - gunakan afplay dengan PID tracking
         const char* filename = NULL;
         bool loop = false;
 
         switch(type) {
-            case SOUND_BELL:
-                filename = "Sound/bellsound.wav";
-                loop = false;
-                break;
-            case SOUND_BACKGROUND:
-                filename = "Sound/backsound.wav";
-                loop = true;
-                break;
-            case SOUND_CHASE:
-                filename = "Sound/chasesound.wav";
-                loop = false;
-                break;
+            case SOUND_BELL:       filename = "Sound/bellsound.wav";      loop = false; break;
+            case SOUND_BACKGROUND: filename = "Sound/backsound.wav";      loop = true;  break;
+            case SOUND_CHASE:      filename = "Sound/chasesound.wav";     loop = false; break;
+            case SOUND_JUMPSCARE:  filename = "Sound/JumpscareSound.wav"; loop = false; break;
         }
 
         if (filename) {
             char cmd[256];
             if (loop) {
-                // PERBAIKAN: Gunakan afplay -l 0 untuk loop infinite
-                // -l 0 = loop forever, 1 proses afplay saja yang handle loop internal
-                snprintf(cmd, sizeof(cmd), 
-                    "afplay -l 0 \"%s\" > /dev/null 2>&1 & echo $!", 
-                    filename);
+                snprintf(cmd, sizeof(cmd), "afplay -l 0 \"%s\" > /dev/null 2>&1 & echo $!", filename);
             } else {
-                snprintf(cmd, sizeof(cmd), 
-                    "afplay \"%s\" > /dev/null 2>&1 & echo $!", 
-                    filename);
+                snprintf(cmd, sizeof(cmd), "afplay \"%s\" > /dev/null 2>&1 & echo $!", filename);
             }
 
             FILE* pipe = popen(cmd, "r");
@@ -107,15 +113,12 @@ void SoundManager::playSound(SoundType type) {
 
 void SoundManager::stopSound(SoundType type) {
     #ifdef _WIN32
-        // Windows: PlaySoundA(NULL, NULL, 0) menghentikan SEMUA suara
-        // Ini adalah limitasi Windows API
         PlaySoundA(NULL, NULL, 0);
-        // Reset semua status playing
-        soundPlaying[SOUND_BELL] = false;
+        soundPlaying[SOUND_BELL]       = false;
         soundPlaying[SOUND_BACKGROUND] = false;
-        soundPlaying[SOUND_CHASE] = false;
+        soundPlaying[SOUND_CHASE]      = false;
+        soundPlaying[SOUND_JUMPSCARE]  = false;
     #else
-        // Mac/Linux: Hentikan hanya PID yang ditarget
         std::map<SoundType, int>::iterator it = soundPIDs.find(type);
         if (it != soundPIDs.end()) {
             int pid = it->second;
@@ -138,7 +141,6 @@ void SoundManager::stopAllSounds() {
     #ifdef _WIN32
         PlaySoundA(NULL, NULL, 0);
     #else
-        // Hentikan semua PID yang tracked
         std::map<SoundType, int>::iterator it;
         for (it = soundPIDs.begin(); it != soundPIDs.end(); ++it) {
             int pid = it->second;
@@ -148,11 +150,9 @@ void SoundManager::stopAllSounds() {
                 system(cmd);
             }
         }
-        // Fallback: kill semua afplay yang tersisa
         system("pkill -f 'afplay' > /dev/null 2>&1");
     #endif
 
-    // Reset status
     std::map<SoundType, bool>::iterator it2;
     for (it2 = soundPlaying.begin(); it2 != soundPlaying.end(); ++it2) {
         it2->second = false;
@@ -165,12 +165,11 @@ void SoundManager::stopAllSounds() {
 }
 
 void SoundManager::restartBackgroundIfNeeded() {
-    // Restart backsound jika tidak sedang diputar
     if (!isPlaying(SOUND_BACKGROUND)) {
         playSound(SOUND_BACKGROUND);
     }
 }
 
 void SoundManager::setVolume(float volume) {
-    // Volume control would require additional implementation
+    
 }

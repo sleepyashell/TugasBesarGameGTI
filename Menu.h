@@ -7,24 +7,26 @@
 #include <GL/glut.h>
 #endif
 
-// Game state
+
 enum GameState {
     STATE_MENU,
     STATE_PLAYING,
-    STATE_PAUSED
+    STATE_PAUSED,
+    STATE_WIN
 };
 
 extern GameState gameState;
 extern int selectedMenuItem;
 
-// Hanya 2 texture yang diperlukan (single image approach)
 extern GLuint menuPlayHighlightTex;
 extern GLuint menuExitHighlightTex;
+extern GLuint winHomeHighlightTex;
+extern GLuint winExitHighlightTex;
 
 void initMenu();
 void loadMenuTextures();
 void drawMenu();
-void handleMenuInput(int key);
+void drawWinScreen();
 void handleMouseClick(int button, int state, int x, int y);
 void resetMenu();
 void cleanupMenuTextures();

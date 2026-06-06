@@ -13,20 +13,24 @@
 
 GameState gameState = STATE_MENU;
 int selectedMenuItem = 0;
-
-// Hanya 2 texture yang diperlukan
 GLuint menuPlayHighlightTex = 0;
 GLuint menuExitHighlightTex = 0;
+GLuint winHomeHighlightTex  = 0;
+GLuint winExitHighlightTex  = 0;
 
 void loadMenuTextures() {
-    // Hanya load 2 file yang sudah Anda sediakan
-    menuPlayHighlightTex = loadBMP("Assets/menuplayhighlight.bmp");
+    
+    menuPlayHighlightTex = loadBMP("Assets//menuplayhighlight.bmp");
     menuExitHighlightTex = loadBMP("Assets/menuexithighlight.bmp");
+    winHomeHighlightTex  = loadBMP("Assets/winscreenhomehighlight.bmp");
+    winExitHighlightTex  = loadBMP("Assets/winscreenexithighlight.bmp");
 }
 
 void cleanupMenuTextures() {
     if (menuPlayHighlightTex) glDeleteTextures(1, &menuPlayHighlightTex);
     if (menuExitHighlightTex) glDeleteTextures(1, &menuExitHighlightTex);
+    if (winHomeHighlightTex)  glDeleteTextures(1, &winHomeHighlightTex);
+    if (winExitHighlightTex)  glDeleteTextures(1, &winExitHighlightTex);
 }
 
 void initMenu() {
@@ -56,7 +60,6 @@ void drawMenu() {
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
     
-    // Setup 2D projection fullscreen
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -64,20 +67,18 @@ void drawMenu() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    
-    // Pilih texture berdasarkan menu yang aktif
     GLuint activeTexture = (selectedMenuItem == 0) ? menuPlayHighlightTex : menuExitHighlightTex;
     
     if (activeTexture) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, activeTexture);
         glColor3f(1.0f, 1.0f, 1.0f);
-        // Gambar fullscreen 1280x720
+        
         drawQuad(0, 0, 1280, 720);
         glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_TEXTURE_2D);
     } else {
-        // Fallback jika texture gagal load
+        
         glColor3f(0.05f, 0.05f, 0.08f);
         glBegin(GL_QUADS);
         glVertex2f(0, 0);
@@ -87,60 +88,44 @@ void drawMenu() {
         glEnd();
     }
     
-    // Restore projection
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-    
     glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
-    
     glutSwapBuffers();
 }
 
-void handleMenuInput(int key) {
-    switch (key) {
-        case 'w':
-        case 'W':
-            selectedMenuItem = 0;
-            break;
-            
-        case 's':
-        case 'S':
-            selectedMenuItem = 1;
-            break;
-            
-        case 13:  // ENTER
-            if (selectedMenuItem == 0) {
-                gameState = STATE_PLAYING;
-                startIntroDialog();
-                soundManager.playSound(SOUND_BELL);
-            } else if (selectedMenuItem == 1) {
-                cleanupMenuTextures();
-                exit(0);
-            }
-            break;
-            
-        case 27:  // ESC
-            cleanupMenuTextures();
-            exit(0);
-            break;
-    }
-}
+void drawWinScreen() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 1280, 720, 0);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
 
-void handleMouseClick(int button, int state, int x, int y) {
-    if (gameState != STATE_MENU) return;
-    
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        // Area Play (perkiraan, sesuaikan dengan posisi tombol di gambar Anda)
-        if (y >= 250 && y <= 380 && x >= 450 && x <= 830) {
-            gameState = STATE_PLAYING;
-        }
-        // Area Exit
-        else if (y >= 380 && y <= 510 && x >= 450 && x <= 830) {
-            cleanupMenuTextures();
-            exit(0);
-        }
+    GLuint activeTexture = (selectedMenuItem == 0) ? winHomeHighlightTex : winExitHighlightTex;
+
+    if (activeTexture) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, activeTexture);
+        glColor3f(1.0f, 1.0f, 1.0f);
+        drawQuad(0, 0, 1280, 720);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_TEXTURE_2D);
     }
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+  	glutSwapBuffers();
 }
