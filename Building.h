@@ -1,10 +1,12 @@
 #ifndef BUILDING_H_INCLUDED 
 #define BUILDING_H_INCLUDED 
 
-void drawCorridorInterior(float width, float depth);
-void drawCorridorFront(float width, float floorY);
+void drawCorridor(float width, float depth, float currentFloor);
 void drawRoomInterior(float width, float depth);
-void drawStairArea(float width, float depth, bool isLastFloor);
+void drawStairArea(float width,
+                   float depth,
+                   bool isLastFloor,
+                   float offsetY);
 void drawStairDown();
 void drawDoubleDoor(float alpha);
 
@@ -16,5 +18,8 @@ void drawFrontWall(float width, float depth, float startX, bool isFlipped,
                    float floorY);
 void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown);
 void drawRuangGedung();
+
+void drawGate();
+void drawOuterWalls();
 
 #endif
