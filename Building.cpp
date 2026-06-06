@@ -1,29 +1,42 @@
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 #include "Building.h"
+
 #include "Material.h"
 #include "Drawing.h"
 #include "World.h"
+#include "Texture.h"
 
-void drawCorridorInterior(float width, float depth) {
-	// Lantai koridor dengan texture ubin
+void drawCorridor(float width, float depth, float currentFloor){
+    
     bindTexture(TEX_FLOOR_TILE);
-    
-    float uMax = width / 2.0f;   // 1 tile = 2 unit
+    matFloor();  
+    float uMax = width / 2.0f; 
     float vMax = depth / 2.0f;
-    
-    glBegin(GL_QUADS);
-        glNormal3f(0, 1, 0);
-        glTexCoord2f(0,    0);    glVertex3f(0,     0.05f,  0);
-        glTexCoord2f(uMax, 0);    glVertex3f(width, 0.05f,  0);
-        glTexCoord2f(uMax, vMax); glVertex3f(width, 0.05f, -depth);
-        glTexCoord2f(0,    vMax); glVertex3f(0,     0.05f, -depth);
-    glEnd();
-    
+    if (currentFloor == 0){
+    	glBegin(GL_QUADS);
+	        glNormal3f(0, 1, 0);
+	        glTexCoord2f(0,    0);    glVertex3f(-6.0f,     0.05f,  0);
+	        glTexCoord2f(uMax, 0);    glVertex3f(width, 0.05f,  0);
+	        glTexCoord2f(uMax, vMax); glVertex3f(width, 0.05f, -depth);
+	        glTexCoord2f(0,    vMax); glVertex3f(-6.0f,     0.05f, -depth);
+	    glEnd();
+    } else{
+    	glBegin(GL_QUADS);
+	        glNormal3f(0, 1, 0);
+	        glTexCoord2f(0,    0);    glVertex3f(0.0f,     0.05f,  0);
+	        glTexCoord2f(uMax, 0);    glVertex3f(width, 0.05f,  0);
+	        glTexCoord2f(uMax, vMax); glVertex3f(width, 0.05f, -depth);
+	        glTexCoord2f(0,    vMax); glVertex3f(0.0f,     0.05f, -depth);
+	    glEnd();
+    }
     unbindTexture();
+ 
+    
+    glPushMatrix();
+        glTranslatef(0, 4.0f, 0);
+        matFloor();   drawBlock(width, 0.05f, depth);
+        glTranslatef(0, 0.05f, 0);
+        matConcrete(); drawBlock(width, 0.95f, depth);  
+    glPopMatrix();
 
     glPushMatrix();
         glTranslatef(0, 4.0f, 0);
@@ -31,169 +44,172 @@ void drawCorridorInterior(float width, float depth) {
         glTranslatef(0, 0.05f, 0);
         matConcrete(); drawBlock(width, 0.95f, depth);  
     glPopMatrix();
-    matFloor();   drawBlock(width, 0.05f, depth);  // lantai koridor Z=4..0
-    glPushMatrix();
-        glTranslatef(0, 4.0f, 0);
-        matFloor();   drawBlock(width, 0.05f, depth);
-        glTranslatef(0, 0.05f, 0);
-        matConcrete(); drawBlock(width, 0.95f, depth);  
-    glPopMatrix();
-}
 
-void drawCorridorFront(float width, float floorY) {
-    bool  on    = (playerY >= floorY && playerY < floorY + 4.0f);
-    float alpha = on ? 0.35f : 1.0f;
+	glEnable(GL_LIGHTING);
+	glDepthMask(GL_TRUE);
 
-    if (alpha < 1.0f) {
-        glDepthMask(GL_FALSE);
-        glDisable(GL_LIGHTING);
-    }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-	// 1. Pojok Kiri Lorong
-    if (floorY > 5.0f) {
-        glPushMatrix();
-            if (alpha < 1.0f) glColor4f(0.6f, 0.6f, 0.6f, alpha);
-            else { matConcrete(); }
-            drawBlock(0.2f, 1.0f, 4.0f);
-        glPopMatrix();
-    }
-=======
-=======
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
 	
-	// Pojok Kiri
-	glPushMatrix();
-<<<<<<< Updated upstream
-		glEnable(GL_LIGHTING);
-        glDepthMask(GL_TRUE);
-=======
->>>>>>> Stashed changes
-		matConcrete();
-        drawBlock(0.2f, 1.0f, 4.0f);
-    glPopMatrix();
-<<<<<<< HEAD
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
-=======
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
-    
-<<<<<<< Updated upstream
-=======
-    // Pojok Kanan
-    glPushMatrix();
-<<<<<<< HEAD
-<<<<<<< HEAD
-        // BUG FIX: Dipaskan sejajar tiang agar tidak memotong semen koridor
+	if (currentFloor > 0){
+		glPushMatrix();
+			matConcrete();
+	        drawBlock(0.2f, 1.0f, 4.0f);
+	    glPopMatrix();
+	}
 
-=======
-=======
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
-    	glTranslatef(51.8f, 0.0f, 0.0f);
-        matConcrete();
-        drawBlock(0.2f, 1.0f, 4.0f);
-    glPopMatrix();
-    
->>>>>>> Stashed changes
-    // Balok depan
+	
     glPushMatrix();
-        glTranslatef(0.0f, 0.0f, -0.1f);
-<<<<<<< HEAD
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
-=======
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
-        if (alpha < 1.0f) glColor4f(0.6f, 0.6f, 0.6f, alpha);
-        else { matConcrete(); }
+		matConcrete();
         drawBlock(width, 1.0f, 0.2f);
     glPopMatrix();
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    // Pojok Kanan
-    glPushMatrix();
-        glTranslatef(width - 0.2f, 0.0f, 0.0f);
-        if (alpha < 1.0f) glColor4f(0.6f, 0.6f, 0.6f, alpha);
-        else { matConcrete(); }
-=======
     
-<<<<<<< Updated upstream
-    // Pojok Kanan
-    glPushMatrix();
-=======
     
-<<<<<<< Updated upstream
-    // Pojok Kanan
     glPushMatrix();
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
-    	glEnable(GL_LIGHTING);
-        glDepthMask(GL_TRUE);
     	glTranslatef(51.8f, 0.0f, 0.0f);
         matConcrete();
-<<<<<<< HEAD
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
-=======
->>>>>>> parent of 1a1b1a5 (Bot, poster, collider fix)
         drawBlock(0.2f, 1.0f, 4.0f);
     glPopMatrix();
-=======
 
->>>>>>> Stashed changes
+    const float segment  = 8.0f;
+    const float pillarW = 0.4f;
     
+    int jumlahSegmen = (int)((width + 4) / segment);
 
-    const float SEGMENT  = 8.0f;
-    const float PILLAR_W = 0.4f;
     
-    int jumlahSegmen = (int)((width + 4) / SEGMENT);
-
-    // Tiang kiri
     glPushMatrix();
-        if (alpha < 1.0f) glColor4f(0.5f, 0.5f, 0.5f, alpha);
-        else matPillar();
-        drawBlock(PILLAR_W, 4.0f, 0.2f);
+        matPillar();
+        drawBlock(pillarW, 4.0f, 0.2f);
     glPopMatrix();
 
-    // Tiang tengah
+    
     for (int i = 1; i < jumlahSegmen; i++) {
-        float x = i * SEGMENT - (PILLAR_W / 2.0f);
+        float x = i * segment - (pillarW / 2.0f);
         if (i >= 5){
         	glPushMatrix();
 	            glTranslatef(x-4.0f, 0.0f, 0.0f);
-	            if (alpha < 1.0f) glColor4f(0.5f, 0.5f, 0.5f, alpha);
-	            else matPillar();
-	            drawBlock(PILLAR_W, 4.0f, 0.2f);
+	            matPillar();
+	            drawBlock(pillarW, 4.0f, 0.2f);
 	        glPopMatrix();
         }
         else {
         	glPushMatrix();
 	            glTranslatef(x, 0.0f, 0.0f);
-	            if (alpha < 1.0f) glColor4f(0.5f, 0.5f, 0.5f, alpha);
-	            else matPillar();
-	            drawBlock(PILLAR_W, 4.0f, 0.2f);
+	            matPillar();
+	            drawBlock(pillarW, 4.0f, 0.2f);
 	        glPopMatrix();
         }
     }
 
-    // Tiang kanan
+    
     glPushMatrix();
-        glTranslatef(width - PILLAR_W, 0.0f, 0.0f);
-        if (alpha < 1.0f) glColor4f(0.5f, 0.5f, 0.5f, alpha);
-        else matPillar();
-        drawBlock(PILLAR_W, 4.0f, 0.2f);
+        glTranslatef(width - pillarW, 0.0f, 0.0f);
+        matPillar();
+        drawBlock(pillarW, 4.0f, 0.2f);
     glPopMatrix();
 
-    if (alpha < 1.0f) {
-        glEnable(GL_LIGHTING);
-        glDepthMask(GL_TRUE);
-    }
 }
 
-// Render 1 ruangan 
-// Dinding kiri paling ujung gedung ditambahin manual di drawOneLantai
-void drawRoomInterior(float width, float depth) {
-	// Lantai ruangan dengan texture ubin
-    bindTexture(TEX_FLOOR_TILE);
+void drawGate(){
+    const float gateX    = -6.0f;
+    const float gateZ    = 2.0f;
+    const float gateWidth = 4.0f;
+    const float pillarSize = 0.8f;
+    glPushMatrix();
+        glTranslatef(gateX, 0.0f, gateZ - gateWidth/2.0f);
+        matConcrete();
+        drawBlock(pillarSize, 5.0f, -pillarSize);
+    glPopMatrix();
+    glPushMatrix();
+        glTranslatef(gateX, 0.0f, gateZ + gateWidth/2.0f);
+        matConcrete();
+        drawBlock(pillarSize, 5.0f, pillarSize);
+    glPopMatrix();
+
+    glPushMatrix();
+        glTranslatef(gateX, 5.0f, gateZ + gateWidth/2.0f);
+        matConcrete();
+        drawBlock(0.8f, 0.5f, gateWidth);
+    glPopMatrix();
+
+    int nJeruji = 9;
+    float startZ = gateZ - (gateWidth / 2.0f); 
+    float endZ   = gateZ + (gateWidth / 2.0f);
     
-    float uMax = width / 2.0f;   // 1 tile = 2 unit
+    float jerujiAreaStart = startZ + 0.8f;
+    float jerujiAreaEnd   = endZ - 0.8f;
+    float jerujiWidth     = jerujiAreaEnd - jerujiAreaStart;
+    
+    
+    float gapJeruji = jerujiWidth / (float)(nJeruji - 1);
+
+    for (int i = 0; i < nJeruji; i++) {
+        glPushMatrix();
+            glTranslatef(gateX + 0.35f, 0.15f, jerujiAreaStart + (i * gapJeruji));
+            matPillar();
+            drawBlock(0.12f, 4.0f, 0.12f);
+        glPopMatrix();
+    }
+    
+    glPushMatrix();
+        glTranslatef(gateX + 0.35f, 4.0f, jerujiAreaEnd); 
+        matPillar();
+        drawBlock(0.12f, 0.12f, jerujiWidth);
+    glPopMatrix();
+	
+	
+    glPushMatrix();
+        glTranslatef(gateX + 0.35f, 0.15f, jerujiAreaEnd); 
+        matPillar();
+        drawBlock(0.12f, 0.12f, jerujiWidth);
+    glPopMatrix();
+    
+    
+    glPushMatrix();
+        glTranslatef(gateX, 0.0f, 0.0f); 
+        matPillar();
+        drawBlock(6.0f, 1.0f, 0.2f);
+    glPopMatrix();
+    
+    
+    glPushMatrix();
+        glTranslatef(gateX, 0.0f, 4.0f); 
+        matPillar();
+        drawBlock(6.0f, 1.0f, 0.2f);
+    glPopMatrix();
+}
+
+void drawOuterWalls()
+{
+    matConcrete();
+    glPushMatrix();
+        glTranslatef(-6.0f, 0.0f, 15.0f);
+        drawBlock(64.0f, 2.5f, 0.5f);
+    glPopMatrix();
+    
+    glPushMatrix();
+        glTranslatef(-6.0f, 0.0f, -25.0f);
+        drawBlock(64.0f, 2.5f, 0.5f);
+    glPopMatrix();
+    
+    glPushMatrix();
+        glTranslatef(-6.0f, 0.0f, 4.0f);
+        drawBlock(0.5f, 2.5f, -11.0f);
+    glPopMatrix();
+    
+    glPushMatrix();
+        glTranslatef(-6.0f, 0.0f, 0.0f);
+        drawBlock(0.5f, 2.5f, 25.0f);
+    glPopMatrix();
+    
+    glPushMatrix();
+        glTranslatef(58.0f, 0.0f, 15.0f);
+        drawBlock(0.5f, 2.5f, 40.0f);
+    glPopMatrix();
+}
+
+void drawRoomInterior(float width, float depth) {
+    bindTexture(TEX_FLOOR_TILE);
+    matFloor();  
+    float uMax = width / 2.0f;
     float vMax = depth / 2.0f;
     
     glBegin(GL_QUADS);
@@ -205,44 +221,42 @@ void drawRoomInterior(float width, float depth) {
     glEnd();
     
     unbindTexture();
-    matFloor();   drawBlock(width, 0.05f, depth);
     drawDeskSet(width, depth);
     
     bindTexture(TEX_WALL);
     matConcrete();
-    // Tembok Kiri
+    
 	glPushMatrix();
 		glTranslatef(0, 0, -0.01f);
 		drawWallBlock(0.2f, 4.0f, 9.99f);
 	glPopMatrix();
 	
-	// Tembok Kanan
+	
 	glPushMatrix();
 		glTranslatef(7.8f, 0, -0.01f);
 		drawWallBlock(0.2f, 4.0f, 9.99f);
 	glPopMatrix();
 
-    // Tembok belakang
+    
     glPushMatrix();
         glTranslatef(0, 0, -depth);
 		drawWallBlock(width, 4.0f, 0.2f);
     glPopMatrix();
     unbindTexture();
 
-    // Plafon
+    
     glPushMatrix();
         glTranslatef(0, 4.0f, 0);
         matFloor();    drawBlock(width, 0.05f, depth);
         glTranslatef(0, 0.05f, 0);
         matConcrete(); drawBlock(width, 0.95f, depth);
     glPopMatrix();
-    
-    // Dinding kanan
 }
 
 void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
 	if (offsetY == 0.0f) {
         bindTexture(TEX_FLOOR_TILE);
+        matFloor();  
         glBegin(GL_QUADS);
             glNormal3f(0, 1, 0);
             glTexCoord2f(0, 0);    glVertex3f(0,     0.05f,  0);
@@ -260,7 +274,6 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
     glPopMatrix();
 
 	if (isLastFloor) {
-		// railing atas
 		glPushMatrix();
             glTranslatef(0, 0.0f, -1);
             matFloor(); drawBlock(2.15f, 1.0f, 0.2f);
@@ -273,7 +286,6 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
             matConcrete(); drawBlock(width, 0.95f, depth);
         glPopMatrix();
 
-        // Top landing with texture
         glPushMatrix();
             glTranslatef(0, 0.05f, 0);
             bindTexture(TEX_FLOOR_TILE);
@@ -310,35 +322,26 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
 	    glPopMatrix();
         matFloor(); 
     }
-    
-    glPushMatrix();
-    	matFloor(); 
-		glTranslatef(1.85f, 2.4f, -4.6);
-		drawBlock(0.3f, 1.0f, 0.2f);
-    glPopMatrix();
+
 
 
     float xLeft  = 1.85f;
     float xRight = 2.0f;
 
-    // TANJAKAN SEBELAH KIRI 
     matFloor(); 
     glBegin(GL_QUADS);
-        // A. SISI KIRI 
         glNormal3f(-1.0f, 0.0f, 0.0f);
         glVertex3f(xLeft, 0.0f,        -1.2f);
         glVertex3f(xLeft, 2.4f,        -4.6f);
         glVertex3f(xLeft, 2.4f + 1.0f, -4.6f);
         glVertex3f(xLeft, 0.0f + 1.0f, -1.2f);
-
-        // B. SISI KANAN 
+        
         glNormal3f(1.0f, 0.0f, 0.0f); 
         glVertex3f(xRight, 0.0f,        -1.2f);
         glVertex3f(xRight, 2.4f,        -4.6f);
         glVertex3f(xRight, 2.4f + 1.0f, -4.6f);
         glVertex3f(xRight, 0.0f + 1.0f, -1.2f);
 
-        // C. SISI ATAS 
         glNormal3f(0.0f, 0.9f, 0.4f); 
         glVertex3f(xLeft,  0.0f + 1.0f, -1.2f);
         glVertex3f(xRight, 0.0f + 1.0f, -1.2f);
@@ -349,7 +352,6 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
     xLeft  = 2.0f;
     xRight = 2.15f;
 
-    // TANJAKAN SEBELAH KANAN 
     glBegin(GL_QUADS);
         glNormal3f(-1.0f, 0.0f, 0.0f);
         glVertex3f(xLeft, 2.4f,        -4.6f);
@@ -357,14 +359,12 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
         glVertex3f(xLeft, FLOOR_HEIGHT + 1.0f, -1.2f);
         glVertex3f(xLeft, 2.4f + 1.0f, -4.6f);
 
-        // B. SISI KANAN
         glNormal3f(1.0f, 0.0f, 0.0f);
         glVertex3f(xRight, 2.4f,        -4.6f);
         glVertex3f(xRight, FLOOR_HEIGHT - 0.2f, -1.2f);
         glVertex3f(xRight, FLOOR_HEIGHT + 1.0f, -1.2f);
         glVertex3f(xRight, 2.4f + 1.0f, -4.6f);
 
-        // C. SISI ATAS
         glNormal3f(0.0f, 0.9f, -0.4f);
         glVertex3f(xLeft,  2.4f + 1.0f, -4.6f);
         glVertex3f(xRight, 2.4f + 1.0f, -4.6f);
@@ -379,10 +379,10 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
         glPopMatrix();
     }
 
-    // Bordes (middle landing) with texture
     glPushMatrix();
-        glTranslatef(0.0f, 2.4f, -4.6f);
+        glTranslatef(0.0f, 2.4f, -4.9f);
         bindTexture(TEX_FLOOR_TILE);
+        matFloor();  
         glBegin(GL_QUADS);
             glNormal3f(0, 1, 0);
             glTexCoord2f(0, 0);    glVertex3f(0, 0.2f,  0);
@@ -393,10 +393,10 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
         unbindTexture();
     glPopMatrix();
 
-    // Top landing with texture
     glPushMatrix();
         glTranslatef(0, 0.05f, 0);
         bindTexture(TEX_FLOOR_TILE);
+        matFloor();  
         glBegin(GL_QUADS);
             glNormal3f(0, 1, 0);
             glTexCoord2f(0, 0);    glVertex3f(0, 0,  0);
@@ -414,6 +414,7 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
         glPopMatrix();
     }
 }
+
 
 
 void drawDoubleDoor(float alpha) {
@@ -454,31 +455,33 @@ void drawDoubleDoor(float alpha) {
 
 void drawFrontWall(float width, float depth, float startX, bool isFlipped,
                    float floorY) {
-    // Cek apakah player di dalam ruangan ini (untuk transparansi)
-    bool  insideZ   = (playerZ < 0.5f);
+    
+    bool  insideZ   = (playerZ < 0.0f);
     bool  insideX   = (playerX >= startX && playerX <= startX + width);
     bool  sameFloor = (playerY >= floorY && playerY < floorY + FLOOR_HEIGHT);
-    float alpha     = (insideZ && insideX && sameFloor) ? 0.35f : 1.0f;
+    float alpha     = (insideZ && insideX && sameFloor) ? 0.25f : 1.0f;  
 
     if (alpha < 1.0f) {
         glDepthMask(GL_FALSE);
         glDisable(GL_LIGHTING);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    // Hitung doorX relatif terhadap startX
+    
     float doorX = isFlipped ? 5.0f : 1.0f;
 
-    // Gambar frame dinding (beton di sekeliling pintu)
+    
     if (alpha < 1.0f) {
         glColor4f(0.7f, 0.7f, 0.65f, alpha);
-        // Kiri pintu
+        
         drawBlock(doorX, 4.0f, 0.2f);
-        // Kanan pintu
+        
         glPushMatrix();
             glTranslatef(doorX + 2.0f, 0, 0);
             drawBlock(width - (doorX + 2.0f), 4.0f, 0.2f);
         glPopMatrix();
-        // Atas pintu (lintel)
+        
         glPushMatrix();
             glTranslatef(doorX, 2.5f, 0);
             drawBlock(2.0f, 1.5f, 0.2f);
@@ -497,45 +500,50 @@ void drawFrontWall(float width, float depth, float startX, bool isFlipped,
             matConcrete(); 
             drawWallBlock(2.0f, 1.5f, 0.2f);
         glPopMatrix();
-        unbindTexture();
     }
-
-    if (alpha < 1.0f) {
-        glEnable(GL_LIGHTING);
-        glDepthMask(GL_TRUE);
-    }
-
-    // === GAMBAR PINTU ANIMATIF ===
-    // Gunakan getRoomIndexFromX untuk mapping yang konsisten
-    int currentFloor = (int)(floorY / FLOOR_HEIGHT);
-    int roomIndex = getRoomIndexFromX(startX + 0.1f); // +0.1f untuk avoid boundary
     
-    // Jika valid dan bukan area tangga
+    
+    
+    int currentFloor = (int)(floorY / FLOOR_HEIGHT);
+    int roomIndex = getRoomIndexFromX(startX + 0.1f); 
+    
+    
     if (roomIndex >= 0 && roomIndex < NUM_ROOMS_PER_FLOOR && roomIndex != 3) {
         float doorAngle = doorAnims[currentFloor][roomIndex].currentAngle;
         
         glPushMatrix();
-            // Pintu digambar di posisi relatif doorX dari startX
+            
             glTranslatef(doorX, 0, 0);
-            // Gambar pintu dengan lebar 2.0f, tinggi 2.5f
+            
             drawAnimatedDoor(0, 0, 0, 2.0f, 2.5f, doorAngle, isFlipped, alpha);
         glPopMatrix();
     } else {
-        // Fallback ke pintu statis (area tangga atau error)
+        
         glPushMatrix();
             glTranslatef(doorX, 0, 0);
             drawDoubleDoor(alpha);
         glPopMatrix();
     }
+    
+    if (alpha < 1.0f) {
+        glEnable(GL_LIGHTING);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+    }
+    
+    if (alpha == 1.0f) {
+        unbindTexture(); 
+    }
 }
 
-void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown) {
-    glPushMatrix();
+void drawOneLantai(float offsetY, int currentFloor, bool hasStairDown) {
+	bool isLastFloor  = (currentFloor == NUM_FLOORS - 1);
+	glPushMatrix();
     glTranslatef(0, offsetY, 0);
 
         glPushMatrix();
             glTranslatef(0, 0, 4);
-            drawCorridorInterior(52, 4);
+            drawCorridor(52, 4, currentFloor);
         glPopMatrix();
 
         glPushMatrix();
@@ -560,49 +568,48 @@ void drawOneLantai(float offsetY, bool isLastFloor, bool hasStairDown) {
             drawFrontWall(8, 10, 36, false, offsetY); glTranslatef(8, 0, 0);
             drawFrontWall(8, 10, 44, false, offsetY);
         glPopMatrix();
-        
-        glPushMatrix();
-            glTranslatef(0, 0, 4);
-            drawCorridorFront(52, offsetY); // Gunakan offsetY untuk kalkulasi tekstur/posisi vertikal
-        glPopMatrix();
+
     glPopMatrix();
+
+	for (int room = 0; room < 4; room++) {
+        drawRoomPosters(currentFloor, room);
+    }
 }
 
 void drawRuangGedung() {
     for (int f = 0; f < NUM_FLOORS; f++) {
-        bool isLastFloor  = (f == NUM_FLOORS - 1);
         bool hasStairDown = (f > 0);
-        drawOneLantai(f * FLOOR_HEIGHT, isLastFloor, hasStairDown);
+        drawOneLantai(f * FLOOR_HEIGHT, f, hasStairDown);
     }
 }
 
-// Gambar rantai/papan kayu yang menandakan pintu terkunci
+
 void drawLockedDoorMarker(float alpha) {
     glDisable(GL_LIGHTING);
     
-    // Warna rantai besi gelap
+    
     glColor4f(0.15f, 0.15f, 0.18f, alpha);
     
-    // Rantai horizontal
+    
     glPushMatrix();
         glTranslatef(0.5f, 1.2f, 0.08f);
         drawBlock(1.0f, 0.08f, 0.06f);
     glPopMatrix();
     
-    // Rantai vertikal (gembok di tengah)
+    
     glPushMatrix();
         glTranslatef(0.9f, 0.8f, 0.08f);
         drawBlock(0.12f, 0.5f, 0.06f);
     glPopMatrix();
     
-    // Gembok
+    
     glPushMatrix();
         glTranslatef(0.85f, 1.0f, 0.1f);
         glColor4f(0.25f, 0.25f, 0.28f, alpha);
         glutSolidCube(0.15f);
     glPopMatrix();
     
-    // Papan merah (tanda terkunci)
+    
     glColor4f(0.6f, 0.1f, 0.1f, alpha * 0.8f);
     glPushMatrix();
         glTranslatef(0.5f, 1.8f, 0.08f);
@@ -622,12 +629,12 @@ void drawAnimatedDoor(float x, float y, float z,
 
     float halfWidth = width / 2.0f;
     
-    // === DAUN PINTU KIRI ===
-    // Engsel di kiri (x), terbuka ke kiri (negatif X relatif)
+    
+    
     glPushMatrix();
         glTranslatef(x, y, z);
         
-        // Rotasi: terbuka ke dalam (ke -X untuk daun kiri)
+        
         glRotatef(angle, 0.0f, 1.0f, 0.0f);
         
         if (alpha < 1.0f) {
@@ -635,10 +642,10 @@ void drawAnimatedDoor(float x, float y, float z,
         } else {
             matDoor();
         }
-        // Gambar daun kiri dari engsel ke tengah
+        
         drawBlock(halfWidth, height, 0.1f);
         
-        // Handle di sisi kanan daun kiri
+        
         glPushMatrix();
             glTranslatef(halfWidth - 0.15f, height * 0.4f, 0.05f);
             if (alpha < 1.0f) {
@@ -650,16 +657,16 @@ void drawAnimatedDoor(float x, float y, float z,
         glPopMatrix();
     glPopMatrix();
 
-    // === DAUN PINTU KANAN ===
-    // Engsel di kanan (x + width), terbuka ke kanan (positif X relatif)
+    
+    
     glPushMatrix();
         glTranslatef(x + width, y, z);
         
-        // Rotasi: terbuka ke dalam (ke +X untuk daun kanan)
-        // Negatif angle untuk arah berlawanan
+        
+        
         glRotatef(-angle, 0.0f, 1.0f, 0.0f);
         
-        // Pindah ke kiri untuk gambar dari engsel ke tengah
+        
         glTranslatef(-halfWidth, 0, 0);
         
         if (alpha < 1.0f) {
@@ -669,7 +676,7 @@ void drawAnimatedDoor(float x, float y, float z,
         }
         drawBlock(halfWidth, height, 0.1f);
         
-        // Handle di sisi kiri daun kanan
+        
         glPushMatrix();
             glTranslatef(0.15f, height * 0.4f, 0.05f);
             if (alpha < 1.0f) {
@@ -684,5 +691,6 @@ void drawAnimatedDoor(float x, float y, float z,
     if (alpha < 1.0f) {
         glEnable(GL_LIGHTING);
         glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
     }
 }
