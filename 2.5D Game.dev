@@ -24,12 +24,12 @@ HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
 CommandLine=
-Folders=Body,Header,"Sound Design","Textures Image"
+Folders=Body,Header,"Textures Image"
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=51
+UnitCount=50
 
 [VersionInfo]
 Major=1
@@ -422,16 +422,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit39]
-FileName=CUTSCENE_SOUND_GUIDE.md
-CompileCpp=1
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit40]
 FileName=HorrorGame
 CompileCpp=1
 Folder=
@@ -441,8 +431,9 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit41]
+[Unit40]
 FileName=kentung
+CompileCpp=1
 Folder=
 Compile=0
 Link=0
@@ -450,17 +441,17 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit42]
+[Unit41]
 FileName=Sound.cpp
-CompileCpp=1
 Folder=Body
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+CompileCpp=1
 
-[Unit43]
+[Unit42]
 FileName=Sound.h
 CompileCpp=1
 Folder=Header
@@ -470,8 +461,9 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit44]
+[Unit43]
 FileName=backsound.wav
+CompileCpp=1
 Folder=
 Compile=0
 Link=0
@@ -479,7 +471,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit45]
+[Unit44]
 FileName=bellsound.wav
 Folder=
 Compile=0
@@ -488,7 +480,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit46]
+[Unit45]
 FileName=Jumpscare.h
 Folder=Header
 Compile=1
@@ -498,7 +490,7 @@ OverrideBuildCmd=0
 BuildCmd=
 CompileCpp=1
 
-[Unit47]
+[Unit46]
 FileName=Jumpscare.cpp
 Folder=Body
 Compile=1
@@ -508,17 +500,17 @@ OverrideBuildCmd=0
 BuildCmd=
 CompileCpp=1
 
-[Unit48]
+[Unit47]
 FileName=Shadow.cpp
-CompileCpp=1
 Folder=Body
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+CompileCpp=1
 
-[Unit49]
+[Unit48]
 FileName=Shadow.h
 CompileCpp=1
 Folder=Header
@@ -528,8 +520,18 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit50]
+[Unit49]
 FileName=wall.bmp
+CompileCpp=1
+Folder=Textures Image
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit50]
+FileName=ground.bmp
 Folder=Textures Image
 Compile=0
 Link=0
