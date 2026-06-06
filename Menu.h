@@ -18,7 +18,6 @@ enum GameState {
 extern GameState gameState;
 extern int selectedMenuItem;
 
-
 extern GLuint menuPlayHighlightTex;
 extern GLuint menuExitHighlightTex;
 extern GLuint winHomeHighlightTex;

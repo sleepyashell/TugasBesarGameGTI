@@ -9,7 +9,6 @@ void setupLighting() {
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
-
     
     GLfloat moon_pos[]  = { 0.4f, 1.0f, 0.3f, 0.0f };
     GLfloat moon_diff[] = { 0.28f, 0.32f, 0.42f, 1.0f }; 
@@ -20,7 +19,6 @@ void setupLighting() {
     glLightfv(GL_LIGHT0, GL_SPECULAR, moon_spec);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  moon_amb);
     glEnable(GL_LIGHT0);
-
     
     GLfloat gnd_pos[]  = { 0.0f, -1.0f, 0.0f, 0.0f };
     GLfloat gnd_diff[] = { 0.12f, 0.05f, 0.04f, 1.0f };
@@ -31,7 +29,6 @@ void setupLighting() {
     glLightfv(GL_LIGHT1, GL_SPECULAR, gnd_spec);
     glLightfv(GL_LIGHT1, GL_AMBIENT,  gnd_amb);
     glEnable(GL_LIGHT1);
-
     
     GLfloat global_amb[] = { 0.10f, 0.10f, 0.13f, 1.0f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_amb);

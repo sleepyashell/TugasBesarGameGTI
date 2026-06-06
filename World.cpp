@@ -23,17 +23,11 @@ bool lockedRooms[NUM_FLOORS][NUM_ROOMS_PER_FLOOR] = { {false} };
 extern bool isDoorOpen;
 
 DoorInfo doorInfos[NUM_ROOMS_PER_FLOOR] = {
-    
     { 1.0f,  0.0f, 2.0f, 0.2f, false, 0.0f,  8.0f },
-    
     { 13.0f, 0.0f, 2.0f, 0.2f, true,  8.0f,  8.0f },
-    
     { 17.0f, 0.0f, 2.0f, 0.2f, false, 16.0f, 8.0f },
-    
     { 0.0f,  0.0f, 0.0f, 0.0f, false, 24.0f, 4.0f },  
-    
     { 37.0f, 0.0f, 2.0f, 0.2f, false, 36.0f, 8.0f },
-    
     { 45.0f, 0.0f, 2.0f, 0.2f, false, 44.0f, 8.0f },
 };
 
@@ -46,7 +40,6 @@ int getRoomIndexFromX(float x) {
     if (x >= 44.0f && x < 52.0f) return 5;  
     return -1;
 }
-
 
 DoorAnimation doorAnims[NUM_FLOORS][NUM_ROOMS_PER_FLOOR];
 
@@ -92,11 +85,9 @@ bool updateDoorAnimations(float dt) {
             }
         }
     }
-    
     if (anyAnimating) {
         buildPhysicalWorld(); 
     }
-    
     return anyAnimating;
 }
 
@@ -143,8 +134,6 @@ bool isAtGate()
         playerZ >= -0.0f && playerZ <=  4.0f;
 }
 
-
-
 void checkDoorProximity() {
     int playerFloor = (int)(playerY / FLOOR_HEIGHT);
     if (playerFloor < 0 || playerFloor >= NUM_FLOORS) return;
@@ -157,19 +146,15 @@ void checkDoorProximity() {
         float doorCenterX = door.x + door.w / 2.0f;
         float doorCenterZ = door.z - door.d / 2.0f;
         
-        
         float dx = playerX - doorCenterX;
         float dz = playerZ - doorCenterZ;
         float distance = sqrtf(dx*dx + dz*dz);
         
-        
         bool playerInFront = isPlayerInFrontOfDoor(playerFloor, r);
-        
         
         if (distance < DOOR_OPEN_DISTANCE && playerInFront) {
             triggerDoorOpen(playerFloor, r);
         } 
-        
         else if (distance > DOOR_CLOSE_DISTANCE) {
             triggerDoorClose(playerFloor, r);
         }
@@ -237,7 +222,6 @@ void handleStairs() {
 
 void buildPhysicalWorld() {
     colliders.clear();
-    
     for (int f = 0; f < NUM_FLOORS; f++) {
         float yBot = f * FLOOR_HEIGHT;
         float yTop = yBot + FLOOR_HEIGHT;
@@ -260,16 +244,13 @@ void buildPhysicalWorld() {
                 registerCollider(24.0f, 0.0f, 8.0f, 0.2f, yBot, yTop);
                 continue;
             }
-            
             DoorInfo& door = doorInfos[r];
             float rs = door.roomStartX;
             float rw = door.roomWidth;
             
-            
             if (door.x > rs) {
                 registerCollider(rs, 0.0f, door.x - rs, 0.2f, yBot, yTop);
             }
-            
             
             float doorRight = door.x + door.w;
             if (doorRight < rs + rw) {
@@ -279,26 +260,14 @@ void buildPhysicalWorld() {
             
             registerCollider(door.x, 2.5f, door.w, 0.2f, yBot + 2.5f, yTop);
         }
-
-        
-        
-        
-        
-        
-        
-        
-        
         
         for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
             if (r == 3) continue; 
-            
             DoorInfo& door = doorInfos[r];
             
             if (lockedRooms[f][r]) {
-                
                 registerCollider(door.x, door.z, door.w, door.d, yBot, yTop);
             } else {
-                
                 float angle = doorAnims[f][r].currentAngle;
                 
                 if (angle < 20.0f) {
@@ -319,28 +288,18 @@ void buildPhysicalWorld() {
                 }
             }
         }
-
-        
-        
         
         float sekatX[] = { 7.95f, 15.95f, 23.95f, 31.95f, 35.95f, 43.95f };
         for (int i = 0; i < 6; i++) {
             registerCollider(sekatX[i], 0.0f, 0.05f, 10.0f, yBot, yTop);
         }
-
-        
-        
-        
         registerCollider(0.0f, 0.0f, 0.1f, 10.0f, yBot, yTop);   
         registerCollider(51.9f, 0.0f, 0.1f, 10.0f, yBot, yTop);   
-        
 		registerCollider(52.0f, 4.0f, 0.2f, 4.0f, yBot, yTop);
 		
         if (f > 0){
         	registerCollider(0.0f, 4.0f, 0.2f, 4.0f, yBot, yTop);
         }
-        
-        
         
         float deskSpacingX = (8.0f - 0.4f) / 3.0f;
         float deskSpacingZ = (10.0f - 2.5f) / 3.0f;
@@ -349,7 +308,6 @@ void buildPhysicalWorld() {
         float deskW = 1.4f;
         float deskD = 0.7f;
         float deskH = 0.8f;
-        
         float roomStarts[NUM_ROOMS_PER_FLOOR] = {0.0f, 8.0f, 16.0f, 24.0f, 36.0f, 44.0f};
         
         for (int r = 0; r < NUM_ROOMS_PER_FLOOR; r++) {
@@ -366,10 +324,6 @@ void buildPhysicalWorld() {
                 }
             }
         }
-
-        
-        
-        
         registerCollider(32.0f, -6.0f, 4.0f, 0.2f, yBot, yTop);
         registerCollider(34.0f, -1.0f, 0.05f, 3.5f, yBot, yTop);
         if (f == 0){
@@ -403,7 +357,6 @@ void randomizeLockedRooms() {
             attempts++;
         }
     }
-    
     initDoorAnimations();
 }
 

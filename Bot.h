@@ -30,13 +30,9 @@ struct EnemyBot {
 };
 
 extern EnemyBot ghostBot[3];
-
-
 void initBot();
 void updateBot();
 void drawBot();
-
-
 void handleStairInterpolation();
 bool scanForPlayer();
 void executeChaseMode(int playerFloor);

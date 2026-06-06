@@ -4,7 +4,6 @@
 #include "World.h"
 #include "Texture.h"
 
-
 void drawBlock(float w, float h, float d) {
     glPushMatrix();
         glTranslatef(w / 2.0f, h / 2.0f, -d / 2.0f);
@@ -13,49 +12,41 @@ void drawBlock(float w, float h, float d) {
     glPopMatrix();
 }
 
-
-
 void drawWallBlock(float w, float h, float d) {
     float su = w / 2.0f;  
     float sv = h / 2.0f;
     float sd = d / 2.0f;
 
     glBegin(GL_QUADS);
-        
         glNormal3f(0, 0, 1);
         glTexCoord2f(0,  0);  glVertex3f(0, 0, 0);
         glTexCoord2f(su, 0);  glVertex3f(w, 0, 0);
         glTexCoord2f(su, sv); glVertex3f(w, h, 0);
         glTexCoord2f(0,  sv); glVertex3f(0, h, 0);
-
         
         glNormal3f(0, 0, -1);
         glTexCoord2f(0,  0);  glVertex3f(w, 0, -d);
         glTexCoord2f(su, 0);  glVertex3f(0, 0, -d);
         glTexCoord2f(su, sv); glVertex3f(0, h, -d);
         glTexCoord2f(0,  sv); glVertex3f(w, h, -d);
-
         
         glNormal3f(-1, 0, 0);
         glTexCoord2f(0,  0);  glVertex3f(0, 0, -d);
         glTexCoord2f(sd, 0);  glVertex3f(0, 0,  0);
         glTexCoord2f(sd, sv); glVertex3f(0, h,  0);
         glTexCoord2f(0,  sv); glVertex3f(0, h, -d);
-
         
         glNormal3f(1, 0, 0);
         glTexCoord2f(0,  0);  glVertex3f(w, 0,  0);
         glTexCoord2f(sd, 0);  glVertex3f(w, 0, -d);
         glTexCoord2f(sd, sv); glVertex3f(w, h, -d);
         glTexCoord2f(0,  sv); glVertex3f(w, h,  0);
-
         
         glNormal3f(0, 1, 0);
         glTexCoord2f(0,  0);  glVertex3f(0, h,  0);
         glTexCoord2f(su, 0);  glVertex3f(w, h,  0);
         glTexCoord2f(su, sd); glVertex3f(w, h, -d);
         glTexCoord2f(0,  sd); glVertex3f(0, h, -d);
-
         
         glNormal3f(0, -1, 0);
         glTexCoord2f(0,  0);  glVertex3f(0, 0, -d);
@@ -77,18 +68,14 @@ void drawBlockOutline(float w, float h, float d, float alpha) {
 }
 
 void drawGround() {
-    
-    
     float xMin = -6.0f, xMax = 59.0f;
     float zMin = -25.0f, zMax = 15.0f;
     float yGround = 0.0f;
     
     glDisable(GL_LIGHTING);
     
-    
     bindTexture(TEX_GROUND);
     glColor3f(1.0f, 1.0f, 1.0f);  
-    
     
     float uMax = (xMax - xMin) / 4.0f;
     float vMax = (zMax - zMin) / 4.0f;
@@ -103,7 +90,6 @@ void drawGround() {
     
     unbindTexture();
     glEnable(GL_LIGHTING);
-
     
     glDisable(GL_LIGHTING);
     glColor3f(0.35f, 0.35f, 0.38f);
@@ -136,7 +122,6 @@ void drawTree(float x, float z, float trunkH, float crownR) {
             glutSolidSphere(lr, 10, 8);
         glPopMatrix();
     }
-
     glPopMatrix();
 }
 

@@ -6,7 +6,6 @@
 #include "Texture.h"
 
 void drawCorridor(float width, float depth, float currentFloor){
-    
     bindTexture(TEX_FLOOR_TILE);
     matFloor();  
     float uMax = width / 2.0f; 
@@ -29,7 +28,6 @@ void drawCorridor(float width, float depth, float currentFloor){
 	    glEnd();
     }
     unbindTexture();
- 
     
     glPushMatrix();
         glTranslatef(0, 4.0f, 0);
@@ -47,7 +45,6 @@ void drawCorridor(float width, float depth, float currentFloor){
 
 	glEnable(GL_LIGHTING);
 	glDepthMask(GL_TRUE);
-
 	
 	if (currentFloor > 0){
 		glPushMatrix();
@@ -55,13 +52,11 @@ void drawCorridor(float width, float depth, float currentFloor){
 	        drawBlock(0.2f, 1.0f, 4.0f);
 	    glPopMatrix();
 	}
-
 	
     glPushMatrix();
 		matConcrete();
         drawBlock(width, 1.0f, 0.2f);
     glPopMatrix();
-    
     
     glPushMatrix();
     	glTranslatef(51.8f, 0.0f, 0.0f);
@@ -73,14 +68,10 @@ void drawCorridor(float width, float depth, float currentFloor){
     const float pillarW = 0.4f;
     
     int jumlahSegmen = (int)((width + 4) / segment);
-
-    
     glPushMatrix();
         matPillar();
         drawBlock(pillarW, 4.0f, 0.2f);
     glPopMatrix();
-
-    
     for (int i = 1; i < jumlahSegmen; i++) {
         float x = i * segment - (pillarW / 2.0f);
         if (i >= 5){
@@ -98,8 +89,6 @@ void drawCorridor(float width, float depth, float currentFloor){
 	        glPopMatrix();
         }
     }
-
-    
     glPushMatrix();
         glTranslatef(width - pillarW, 0.0f, 0.0f);
         matPillar();
@@ -138,7 +127,6 @@ void drawGate(){
     float jerujiAreaEnd   = endZ - 0.8f;
     float jerujiWidth     = jerujiAreaEnd - jerujiAreaStart;
     
-    
     float gapJeruji = jerujiWidth / (float)(nJeruji - 1);
 
     for (int i = 0; i < nJeruji; i++) {
@@ -148,13 +136,11 @@ void drawGate(){
             drawBlock(0.12f, 4.0f, 0.12f);
         glPopMatrix();
     }
-    
     glPushMatrix();
         glTranslatef(gateX + 0.35f, 4.0f, jerujiAreaEnd); 
         matPillar();
         drawBlock(0.12f, 0.12f, jerujiWidth);
     glPopMatrix();
-	
 	
     glPushMatrix();
         glTranslatef(gateX + 0.35f, 0.15f, jerujiAreaEnd); 
@@ -162,13 +148,11 @@ void drawGate(){
         drawBlock(0.12f, 0.12f, jerujiWidth);
     glPopMatrix();
     
-    
     glPushMatrix();
         glTranslatef(gateX, 0.0f, 0.0f); 
         matPillar();
         drawBlock(6.0f, 1.0f, 0.2f);
     glPopMatrix();
-    
     
     glPushMatrix();
         glTranslatef(gateX, 0.0f, 4.0f); 
@@ -231,19 +215,16 @@ void drawRoomInterior(float width, float depth) {
 		drawWallBlock(0.2f, 4.0f, 9.99f);
 	glPopMatrix();
 	
-	
 	glPushMatrix();
 		glTranslatef(7.8f, 0, -0.01f);
 		drawWallBlock(0.2f, 4.0f, 9.99f);
 	glPopMatrix();
-
     
     glPushMatrix();
         glTranslatef(0, 0, -depth);
 		drawWallBlock(width, 4.0f, 0.2f);
     glPopMatrix();
     unbindTexture();
-
     
     glPushMatrix();
         glTranslatef(0, 4.0f, 0);
@@ -322,9 +303,6 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
 	    glPopMatrix();
         matFloor(); 
     }
-
-
-
     float xLeft  = 1.85f;
     float xRight = 2.0f;
 
@@ -378,7 +356,6 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
             matStair(); drawBlock(2.0f, 0.2f, 0.3f);
         glPopMatrix();
     }
-
     glPushMatrix();
         glTranslatef(0.0f, 2.4f, -4.9f);
         bindTexture(TEX_FLOOR_TILE);
@@ -414,8 +391,6 @@ void drawStairArea(float width, float depth, bool isLastFloor, float offsetY) {
         glPopMatrix();
     }
 }
-
-
 
 void drawDoubleDoor(float alpha) {
     if (alpha < 1.0f) {
@@ -501,12 +476,8 @@ void drawFrontWall(float width, float depth, float startX, bool isFlipped,
             drawWallBlock(2.0f, 1.5f, 0.2f);
         glPopMatrix();
     }
-    
-    
-    
     int currentFloor = (int)(floorY / FLOOR_HEIGHT);
     int roomIndex = getRoomIndexFromX(startX + 0.1f); 
-    
     
     if (roomIndex >= 0 && roomIndex < NUM_ROOMS_PER_FLOOR && roomIndex != 3) {
         float doorAngle = doorAnims[currentFloor][roomIndex].currentAngle;
@@ -540,7 +511,6 @@ void drawOneLantai(float offsetY, int currentFloor, bool hasStairDown) {
 	bool isLastFloor  = (currentFloor == NUM_FLOORS - 1);
 	glPushMatrix();
     glTranslatef(0, offsetY, 0);
-
         glPushMatrix();
             glTranslatef(0, 0, 4);
             drawCorridor(52, 4, currentFloor);
@@ -583,32 +553,25 @@ void drawRuangGedung() {
     }
 }
 
-
 void drawLockedDoorMarker(float alpha) {
     glDisable(GL_LIGHTING);
-    
-    
     glColor4f(0.15f, 0.15f, 0.18f, alpha);
-    
     
     glPushMatrix();
         glTranslatef(0.5f, 1.2f, 0.08f);
         drawBlock(1.0f, 0.08f, 0.06f);
     glPopMatrix();
     
-    
     glPushMatrix();
         glTranslatef(0.9f, 0.8f, 0.08f);
         drawBlock(0.12f, 0.5f, 0.06f);
     glPopMatrix();
-    
     
     glPushMatrix();
         glTranslatef(0.85f, 1.0f, 0.1f);
         glColor4f(0.25f, 0.25f, 0.28f, alpha);
         glutSolidCube(0.15f);
     glPopMatrix();
-    
     
     glColor4f(0.6f, 0.1f, 0.1f, alpha * 0.8f);
     glPushMatrix();
@@ -626,26 +589,17 @@ void drawAnimatedDoor(float x, float y, float z,
         glDisable(GL_LIGHTING);
         glDepthMask(GL_FALSE);
     }
-
     float halfWidth = width / 2.0f;
-    
-    
     
     glPushMatrix();
         glTranslatef(x, y, z);
-        
-        
         glRotatef(angle, 0.0f, 1.0f, 0.0f);
-        
         if (alpha < 1.0f) {
             glColor4f(0.45f, 0.28f, 0.15f, alpha);
         } else {
             matDoor();
         }
-        
         drawBlock(halfWidth, height, 0.1f);
-        
-        
         glPushMatrix();
             glTranslatef(halfWidth - 0.15f, height * 0.4f, 0.05f);
             if (alpha < 1.0f) {
@@ -657,16 +611,9 @@ void drawAnimatedDoor(float x, float y, float z,
         glPopMatrix();
     glPopMatrix();
 
-    
-    
     glPushMatrix();
         glTranslatef(x + width, y, z);
-        
-        
-        
         glRotatef(-angle, 0.0f, 1.0f, 0.0f);
-        
-        
         glTranslatef(-halfWidth, 0, 0);
         
         if (alpha < 1.0f) {
@@ -675,7 +622,6 @@ void drawAnimatedDoor(float x, float y, float z,
             matDoor();
         }
         drawBlock(halfWidth, height, 0.1f);
-        
         
         glPushMatrix();
             glTranslatef(0.15f, height * 0.4f, 0.05f);

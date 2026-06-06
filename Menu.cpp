@@ -13,8 +13,6 @@
 
 GameState gameState = STATE_MENU;
 int selectedMenuItem = 0;
-
-
 GLuint menuPlayHighlightTex = 0;
 GLuint menuExitHighlightTex = 0;
 GLuint winHomeHighlightTex  = 0;
@@ -62,7 +60,6 @@ void drawMenu() {
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
     
-    
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -70,8 +67,6 @@ void drawMenu() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    
-    
     GLuint activeTexture = (selectedMenuItem == 0) ? menuPlayHighlightTex : menuExitHighlightTex;
     
     if (activeTexture) {
@@ -93,26 +88,20 @@ void drawMenu() {
         glEnd();
     }
     
-    
-    
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-    
     glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
-    
     glutSwapBuffers();
 }
 
 void drawWinScreen() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
-
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -121,7 +110,6 @@ void drawWinScreen() {
     glPushMatrix();
     glLoadIdentity();
 
-    
     GLuint activeTexture = (selectedMenuItem == 0) ? winHomeHighlightTex : winExitHighlightTex;
 
     if (activeTexture) {
@@ -137,9 +125,7 @@ void drawWinScreen() {
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-
     glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
-
-    glutSwapBuffers();
+  	glutSwapBuffers();
 }

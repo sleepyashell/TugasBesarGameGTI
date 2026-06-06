@@ -21,21 +21,11 @@ enum TextureID {
     NUM_TEXTURES
 };
 
-
-
-
-
 GLuint loadBMP(const char* filename);
-
 void initTextures();
 void bindTexture(TextureID texID);
 void unbindTexture();
 void cleanupTextures();
-
-
-
-
-
 void drawPoster(float x, float y, float z, float w, float h, char axis, GLuint texID, float alpha = 1.0f);
 void initPosters();
 void drawRoomPosters(int f, int roomIndex);

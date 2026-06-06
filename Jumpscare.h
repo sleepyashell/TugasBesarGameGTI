@@ -7,11 +7,9 @@
     #include <GL/glut.h>
 #endif
 
-
-extern void restartGame();
-
 #include "Sound.h"
 
+extern void restartGame();
 
 enum JumpscareState {
     JUMPSCARE_NONE,       

@@ -12,12 +12,9 @@
 #include "Texture.h"
 #include "World.h"  
 
-
 using namespace std;
-
 static GLuint g_textures[NUM_TEXTURES] = {0};
 static bool g_textureBound = false;
-
 
 class Image {
 public:
@@ -30,7 +27,6 @@ public:
 };
 
 namespace {
-    
     int toInt(const char* bytes) {
         return (int)(((unsigned char)bytes[3] << 24) |
                      ((unsigned char)bytes[2] << 16) |
@@ -38,12 +34,10 @@ namespace {
                      (unsigned char)bytes[0]);
     }
 
-    
     short toShort(const char* bytes) {
         return (short)(((unsigned char)bytes[1] << 8) |
                        (unsigned char)bytes[0]);
     }
-
     
     int readInt(ifstream &input) {
         char buffer[4];
@@ -71,13 +65,11 @@ namespace {
             isReleased = aarray.isReleased;
             aarray.isReleased = true;
         }
-
         ~auto_array() {
             if (!isReleased && array != NULL) {
                 delete[] array;
             }
         }
-
         T* get() const { return array; }
         T &operator*() const { return *array; }
 
@@ -109,9 +101,6 @@ namespace {
     };
 }
 
-
-
-
 Image* loadBMPImage(const char* filename) {
     ifstream input;
     input.open(filename, ifstream::binary);
@@ -123,7 +112,6 @@ Image* loadBMPImage(const char* filename) {
 
     input.ignore(8);
     int dataOffset = readInt(input);
-
     int headerSize = readInt(input);
     int width;
     int height;
@@ -154,14 +142,11 @@ Image* loadBMPImage(const char* filename) {
         default:
             assert(!"Format bitmap ini tidak diketahui!");
     }
-
-    
     int bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
     int size = bytesPerRow * height;
     auto_array<char> pixels(new char[size]);
     input.seekg(dataOffset, ios_base::beg);
     input.read(pixels.get(), size);
-
     
     auto_array<char> pixels2(new char[width * height * 3]);
     for(int y = 0; y < height; y++) {
@@ -172,12 +157,9 @@ Image* loadBMPImage(const char* filename) {
             }
         }
     }
-
     input.close();
     return new Image(pixels2.release(), width, height);
 }
-
-
 
 GLuint loadBMP(const char* filename) {
     Image* img = loadBMPImage(filename);
@@ -185,8 +167,6 @@ GLuint loadBMP(const char* filename) {
         printf("[Texture] Gagal membuka: %s\n", filename);
         return 0;
     }
-
-    
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
@@ -197,16 +177,11 @@ GLuint loadBMP(const char* filename) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
                  img->width, img->height, 0,
                  GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
-
     printf("[Texture] Loaded: %s (id=%u, %dx%d)\n", filename, texID, img->width, img->height);
-
-    
     delete img;
 
     return texID;
 }
-
-
 
 static GLuint g_posterTex[4] = { 0, 0, 0, 0 };
 
@@ -223,9 +198,6 @@ void initPosters() {
         g_posterTex[i] = loadBMP(POSTER_FILES[i]);
     }
 }
-
-
-
 
 void drawPoster(float x, float y, float z,
                 float w, float h,
@@ -279,12 +251,6 @@ void drawPoster(float x, float y, float z,
     glDisable(GL_TEXTURE_2D);
 }
 
-
-
-
-
-
-
 void drawRoomPosters(int f, int roomIndex) {
     float fy = f * FLOOR_HEIGHT;
     float py = fy + 1.0f;           
@@ -295,26 +261,16 @@ void drawRoomPosters(int f, int roomIndex) {
 
     GLuint texID = g_posterTex[roomIndex % NUM_POSTERS];
     if (texID == 0) return;  
-
-    
     float startX = roomIndex * 8.0f;
-    
-    
     if (roomIndex >= 3) startX = 36.0f; 
-    
     float roomWidth = 8.0f;
-
-    
     bool insideZ   = (playerZ < 0.0f);
     bool insideX   = (playerX >= startX && playerX <= startX + roomWidth);
     bool sameFloor = (playerY >= fy && playerY < fy + FLOOR_HEIGHT);
     float alpha     = (insideZ && insideX && sameFloor) ? 0.05f : 1.0f;
 
-    
     float roomX = startX + 4.0f;
     float px = roomX - pw / 2.0f;  
-
-    
     drawPoster(px, py, pz, pw, ph, 'Z', texID, alpha);
 }
 
@@ -368,15 +324,11 @@ void bindTexture(TextureID texID) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, g_textures[texID]);
         
-        
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        
         g_textureBound = true;
-        
-        
     } else {
         printf("[Texture] ERROR: Cannot bind texture %d (ID=%u)\n", texID, 
                (texID >= 0 && texID < NUM_TEXTURES) ? g_textures[texID] : 999);

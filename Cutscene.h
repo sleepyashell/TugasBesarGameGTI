@@ -36,7 +36,6 @@ public:
     void update(float deltaTime);
     void render();
     void advanceDialog();  
-    
     bool isRunning() const;
     bool isWaitingForInput() const;
     const char* getCurrentDialogText() const;

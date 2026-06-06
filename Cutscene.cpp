@@ -41,17 +41,14 @@ void CutsceneManager::stopCutscene() {
 
 void CutsceneManager::advanceDialog() {
     if (!isActive || dialogLines.empty()) return;
-    
     currentDialogIndex++;
     elapsedTime = 0.0f;
     hasPlayedBell = false;
-    
     
     if (currentDialogIndex >= (int)dialogLines.size()) {
         stopCutscene();
         return;
     }
-    
     
     if (dialogLines[currentDialogIndex].playBellSound) {
         soundManager.playSound(SOUND_BELL);
@@ -65,9 +62,7 @@ void CutsceneManager::update(float deltaTime) {
 
 void CutsceneManager::render() {
     if (!isActive || currentDialogIndex >= (int)dialogLines.size()) return;
-    
     const string& dialogText = dialogLines[currentDialogIndex].text;
-    
     
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
@@ -84,7 +79,6 @@ void CutsceneManager::render() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    
     glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
     glBegin(GL_QUADS);
         glVertex2f(100, 550);
@@ -92,7 +86,6 @@ void CutsceneManager::render() {
         glVertex2f(1180, 680);
         glVertex2f(100, 680);
     glEnd();
-    
     
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2.0f);
@@ -103,7 +96,6 @@ void CutsceneManager::render() {
         glVertex2f(100, 680);
     glEnd();
     
-    
     glColor3f(1.0f, 0.8f, 0.0f); 
     glRasterPos2f(120, 620);
     const char* name = "Umar: ";
@@ -111,14 +103,12 @@ void CutsceneManager::render() {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, name[i]);
     }
     
-    
     glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2f(250, 620);
     
     for (size_t i = 0; i < dialogText.length(); i++) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, dialogText[i]);
     }
-    
     
     glColor3f(0.7f, 0.7f, 0.7f);
     glRasterPos2f(120, 570);

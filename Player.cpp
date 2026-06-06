@@ -14,6 +14,7 @@ float targetAngle  = 0.0f;
 float walkTimer    = 0.0f;
 bool  isWalking    = false;
 bool  playerWon    = false;
+
 void drawPlayer() {
 	if (g_isShadowPass) {
         
@@ -24,8 +25,6 @@ void drawPlayer() {
     glPushMatrix();
     glTranslatef(playerX, playerY - 0.4f, playerZ);
     glRotatef(playerAngle, 0.0f, 1.0f, 0.0f);
-
-        
         if (!g_isShadowPass) setMaterial(0.15f, 0.10f, 0.10f, 1.0f, 0.10f, 0.05f, 0.05f, 16.0f);
         else glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
         glPushMatrix();
@@ -35,7 +34,6 @@ void drawPlayer() {
             glScalef(0.18f, 0.5f, 0.18f);
             glutSolidCube(1);
         glPopMatrix();
-
         
         glPushMatrix();
             glTranslatef(0.12f, 0.25f, 0.0f);
@@ -44,7 +42,6 @@ void drawPlayer() {
             glScalef(0.18f, 0.5f, 0.18f);
             glutSolidCube(1);
         glPopMatrix();
-
         
         if (!g_isShadowPass) setMaterial(0.55f, 0.05f, 0.05f, 1.0f, 0.40f, 0.10f, 0.10f, 48.0f);
         else glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
@@ -54,7 +51,6 @@ void drawPlayer() {
             glutSolidCube(1);
         glPopMatrix();
 
-        
         glPushMatrix();
             glTranslatef(-0.30f, 0.80f, 0.0f);
             glRotatef(-swing, 1.0f, 0.0f, 0.0f);
@@ -62,7 +58,6 @@ void drawPlayer() {
             glScalef(0.15f, 0.55f, 0.15f);
             glutSolidCube(1);
         glPopMatrix();
-
         
         glPushMatrix();
             glTranslatef(0.30f, 0.80f, 0.0f);
@@ -71,7 +66,6 @@ void drawPlayer() {
             glScalef(0.15f, 0.55f, 0.15f);
             glutSolidCube(1);
         glPopMatrix();
-
         
         if (!g_isShadowPass) setMaterial(0.80f, 0.60f, 0.45f, 1.0f, 0.30f, 0.20f, 0.15f, 32.0f);
         else glColor4f(0.0f, 0.0f, 0.0f, 0.5f);

@@ -19,7 +19,6 @@ int deltaMoveX = 0;
 int deltaMoveZ = 0;
 
 void pressNormalKeys(unsigned char key, int x, int y) {
-    
     if (gameState == STATE_WIN) {
         if (key == 13) {  
             if (selectedMenuItem == 0) {
@@ -37,7 +36,6 @@ void pressNormalKeys(unsigned char key, int x, int y) {
         jumpscareManager.handleInput(key);
         return;
     }
-
     if (key == 13) {  
         if (cutsceneManager.isRunning()) {
             cutsceneManager.advanceDialog();
@@ -95,7 +93,6 @@ void releaseNormalKeys(unsigned char key, int x, int y) {
 }
 
 void specialKeys(int key, int x, int y) {
-    
     if (gameState == STATE_WIN) {
         if (key == GLUT_KEY_UP)   selectedMenuItem = 0;  
         if (key == GLUT_KEY_DOWN) selectedMenuItem = 1;  

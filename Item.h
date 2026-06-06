@@ -4,11 +4,6 @@
 #include <vector>
 #include <string>
 using namespace std;
-
-
-
-
-
 enum ItemType {
     ITEM_KEYCARD,       
     ITEM_FLASHLIGHT,    
@@ -17,7 +12,6 @@ enum ItemType {
     ITEM_BATTERY,       
     NUM_ITEM_TYPES
 };
-
 
 struct WorldItem {
     ItemType    type;
@@ -28,7 +22,6 @@ struct WorldItem {
     int         floor;          
 };
 
-
 struct ItemInfo {
     ItemType    type;
     string name;
@@ -36,31 +29,14 @@ struct ItemInfo {
     bool        isRequired;     
 };
 
-
-
 void initItems();
-
-
 void updateItems(float dt);
-
-
 void checkItemPickup();
-
-
 void drawItems();
-
-
 int getCollectedRequiredCount();
-
-
 int getTotalRequiredCount();
-
-
 bool allRequiredItemsCollected();
-
-
 void resetItems();
-
 void drawItemHUD();
 
 #endif

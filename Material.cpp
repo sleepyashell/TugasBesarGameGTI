@@ -23,7 +23,6 @@ void setMaterial(float r, float g, float b, float a,
     glColor4f(r, g, b, a); 
 }
 
-
 void matConcrete() { 
 	setMaterial(0.22f, 0.23f, 0.20f, 1.0f, 0.08f,0.10f,0.08f,  4.0f); 
 }

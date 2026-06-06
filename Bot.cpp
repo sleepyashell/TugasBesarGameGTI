@@ -8,9 +8,6 @@
 
 EnemyBot ghostBots[NUM_FLOORS];
 
-
-
-
 const int NUM_NODES = 3;
 Waypoint nodes[NUM_NODES] = {
     { 2.0f	},  
@@ -18,13 +15,9 @@ Waypoint nodes[NUM_NODES] = {
     { 50.0f	}   
 };
 
-
-
-
 void initBot(){
-	
     for (int i = 0; i < NUM_FLOORS; i++){
-        
+        ghostBots[i].currentFloor = i;
         if (i == 1){	
             ghostBots[i].x = nodes[0].x;
             ghostBots[i].visionX = 1.0f;
@@ -45,15 +38,9 @@ void initBot(){
     }
 }
 
-
-
-
-
-
 bool scanForPlayer(int botIdx){
     int playerFloor = (int)(playerY / FLOOR_HEIGHT); 
 
-    
     if (botIdx == playerFloor && playerZ >= 0.0f){
         float distanceX = std::abs(playerX - ghostBots[botIdx].x);
         float distanceZ = std::abs(playerZ - ghostBots[botIdx].z);
@@ -70,19 +57,16 @@ bool scanForPlayer(int botIdx){
     return false;
 }
 
-
 void corridorPatrol(int botIdx){
     Waypoint nodeKiri  = nodes[0];
     Waypoint nodeKanan = nodes[2];
 
-    
     if (ghostBots[botIdx].z < 2.0f){
         ghostBots[botIdx].z += ghostBots[botIdx].speed;
         if (ghostBots[botIdx].z > 2.0f) ghostBots[botIdx].z = 2.0f;
         return;
     }
 
-	
     if (ghostBots[botIdx].movingRight){
         float stepX = ghostBots[botIdx].x + ghostBots[botIdx].speed;
         if (stepX < nodeKanan.x && !checkCollision(stepX, ghostBots[botIdx].z)){
@@ -99,7 +83,6 @@ void corridorPatrol(int botIdx){
         }
     }
 }
-
 
 void chase(int botIdx, int playerFloor){
     float distanceX = std::abs(playerX - ghostBots[botIdx].x);
@@ -179,7 +162,6 @@ void chase(int botIdx, int playerFloor){
     }
 }
 
-
 void updateBot(){
     int playerFloor = (int)(playerY / FLOOR_HEIGHT); 
     for (int i = 0; i < NUM_FLOORS; i++){
@@ -199,7 +181,6 @@ void updateBot(){
                 ghostBots[i].isSearching = false;
                 ghostBots[i].speed = 0.05f;
             }
-            
             else if (totalDistance > 8.0f){
                 ghostBots[i].isChasing = false;   
                 ghostBots[i].isSearching = false;
@@ -216,7 +197,6 @@ void updateBot(){
                 ghostBots[i].isSearching = false;
             }
         }
-
         if (ghostBots[i].isChasing) {
             chase(i, playerFloor);
         } 
@@ -226,12 +206,10 @@ void updateBot(){
     }
 }
 
-
 void drawBot() {
     glEnable(GL_COLOR_MATERIAL);
-
     for (int i = 0; i < NUM_FLOORS; i++){
-        float hover = sin(glutGet(GLUT_ELAPSED_TIME) * 0.005f + i)* 0.08f;
+        float hover = sin(glutGet(GLUT_ELAPSED_TIME) * 0.005f + i) * 0.08f;
         float sway = sin(glutGet(GLUT_ELAPSED_TIME) * 0.01f + i) * 8.0f;
 
         glPushMatrix();
@@ -241,12 +219,24 @@ void drawBot() {
                 ghostBots[i].z
             );
 
-            if (ghostBots[i].movingRight)
-                glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-            else
-                glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+            float rotationAngle = 0.0f;
 
-            
+            if (ghostBots[i].isChasing) {
+                float deltaX = playerX - ghostBots[i].x;
+                float deltaZ = playerZ - ghostBots[i].z;
+
+                if (std::abs(deltaX) > 0.001f || std::abs(deltaZ) > 0.001f) {
+
+                    rotationAngle = atan2f(deltaX, deltaZ) * 180.0f / M_PI;
+                } else {
+ 
+                    rotationAngle = ghostBots[i].movingRight ? 90.0f : -90.0f;
+                }
+            } else {
+                rotationAngle = ghostBots[i].movingRight ? 90.0f : -90.0f;
+            }
+
+            glRotatef(rotationAngle, 0.0f, 1.0f, 0.0f);
             if (ghostBots[i].isChasing)
                 glColor3f(0.45f, 0.0f, 0.0f);
             else
@@ -257,84 +247,67 @@ void drawBot() {
                 glutSolidCube(1.0f);
             glPopMatrix();
 
-            
             glPushMatrix();
-
                 glTranslatef(0.0f, 1.0f, 0.0f);
                 glRotatef(sway, 0.0f, 1.0f, 0.0f);
 
                 glColor3f(0.08f, 0.08f, 0.08f);
-
                 glPushMatrix();
                     glScalef(0.5f, 0.5f, 0.5f);
                     glutSolidCube(1.0f);
                 glPopMatrix();
-
                 
                 glColor3f(1.0f, 0.0f, 0.0f);
-
                 glPushMatrix();
                     glTranslatef(-0.10f, 0.05f, 0.26f);
                     glutSolidSphere(0.05f, 8, 8);
                 glPopMatrix();
 
-                
                 glPushMatrix();
                     glTranslatef(0.10f, 0.05f, 0.26f);
                     glutSolidSphere(0.05f, 8, 8);
                 glPopMatrix();
 
-                
                 glColor3f(0.0f, 0.0f, 0.0f);
-
                 glPushMatrix();
                     glTranslatef(0.0f, -0.10f, 0.26f);
                     glScalef(0.25f, 0.08f, 0.05f);
                     glutSolidCube(1.0f);
                 glPopMatrix();
-
             glPopMatrix();
 
-            
             glColor3f(0.10f, 0.10f, 0.10f);
-
             glPushMatrix();
                 glTranslatef(-0.35f, 0.15f, 0.0f);
                 glScalef(0.12f, 1.3f, 0.12f);
                 glutSolidCube(1.0f);
             glPopMatrix();
 
-            
             glPushMatrix();
                 glTranslatef(0.35f, 0.15f, 0.0f);
                 glScalef(0.12f, 1.3f, 0.12f);
                 glutSolidCube(1.0f);
             glPopMatrix();
 
-            
             glPushMatrix();
                 glTranslatef(-0.12f, -1.0f, 0.0f);
                 glScalef(0.12f, 0.9f, 0.12f);
                 glutSolidCube(1.0f);
             glPopMatrix();
 
-            
             glPushMatrix();
                 glTranslatef(0.12f, -1.0f, 0.0f);
                 glScalef(0.12f, 0.9f, 0.12f);
                 glutSolidCube(1.0f);
             glPopMatrix();
 
-            
             glColor3f(0.7f, 0.0f, 0.0f);
-
             glPushMatrix();
                 glTranslatef(-0.35f, -0.55f, 0.0f);
                 glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
                 glutSolidCone(0.05f, 0.18f, 6, 2);
             glPopMatrix();
 
-            
             glPushMatrix();
                 glTranslatef(0.35f, -0.55f, 0.0f);
                 glRotatef(90.0f, 1.0f, 0.0f, 0.0f);

@@ -19,20 +19,16 @@ JumpscareManager::~JumpscareManager() {
 
 void JumpscareManager::loadTextures() {
     if (texturesLoaded) return;
-
     printf("[Jumpscare] Loading textures from Assets/ folder...\n");
 
-    
     jumpscareTex = loadBMP("Assets/jumpscare.bmp");
     if (jumpscareTex == 0) jumpscareTex = loadBMP("jumpscare.bmp");
     if (jumpscareTex == 0) jumpscareTex = loadBMP("../Assets/jumpscare.bmp");
 
-    
     gameoverTex = loadBMP("Assets/gameoverrestarthighlight.bmp");
     if (gameoverTex == 0) gameoverTex = loadBMP("gameoverrestarthighlight.bmp");
     if (gameoverTex == 0) gameoverTex = loadBMP("../Assets/gameoverrestarthighlight.bmp");
 
-    
     gameoverExitTex = loadBMP("Assets/gameoverexithighlight.bmp");
     if (gameoverExitTex == 0) gameoverExitTex = loadBMP("gameoverexithighlight.bmp");
     if (gameoverExitTex == 0) gameoverExitTex = loadBMP("../Assets/gameoverexithighlight.bmp");
@@ -62,10 +58,8 @@ void JumpscareManager::startJumpscare() {
     timer = 0.0f;
     selectedOption = 0;
 
-    
     soundManager.stopSound(SOUND_BACKGROUND);
     soundManager.stopSound(SOUND_CHASE);
-
     soundManager.playSound(SOUND_JUMPSCARE);
     glutPostRedisplay();
     printf("[Jumpscare] Started!\n");
