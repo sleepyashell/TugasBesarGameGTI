@@ -9,14 +9,15 @@ using namespace std;
 enum SoundType {
     SOUND_BELL,
     SOUND_BACKGROUND,
-    SOUND_CHASE
+    SOUND_CHASE,
+    SOUND_JUMPSCARE
 };
 
 class SoundManager {
 private:
     bool soundsInitialized;
      map<SoundType, int> soundPIDs;
-    // Track apakah suara sedang diputar
+    
     map<SoundType, bool> soundPlaying;
     
 public:

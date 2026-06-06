@@ -1,15 +1,9 @@
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
 #include "Drawing.h"
+
 #include "Material.h"
 #include "World.h"
 #include "Texture.h"
 
-// drawBlock biasa (tanpa UV, untuk geometry non-texture)
 void drawBlock(float w, float h, float d) {
     glPushMatrix();
         glTranslatef(w / 2.0f, h / 2.0f, -d / 2.0f);
@@ -18,50 +12,42 @@ void drawBlock(float w, float h, float d) {
     glPopMatrix();
 }
 
-// drawWallBlock - sama tapi pake glBegin/GL_QUADS dengan UV
-// Dipanggil setelah bindTexture(TEX_WALL)
 void drawWallBlock(float w, float h, float d) {
-    float su = w / 2.0f;  // 1 tile = 2 unit
+    float su = w / 2.0f;  
     float sv = h / 2.0f;
     float sd = d / 2.0f;
 
     glBegin(GL_QUADS);
-        // Depan (Z=0)
         glNormal3f(0, 0, 1);
         glTexCoord2f(0,  0);  glVertex3f(0, 0, 0);
         glTexCoord2f(su, 0);  glVertex3f(w, 0, 0);
         glTexCoord2f(su, sv); glVertex3f(w, h, 0);
         glTexCoord2f(0,  sv); glVertex3f(0, h, 0);
-
-        // Belakang (Z=-d)
+        
         glNormal3f(0, 0, -1);
         glTexCoord2f(0,  0);  glVertex3f(w, 0, -d);
         glTexCoord2f(su, 0);  glVertex3f(0, 0, -d);
         glTexCoord2f(su, sv); glVertex3f(0, h, -d);
         glTexCoord2f(0,  sv); glVertex3f(w, h, -d);
-
-        // Kiri (X=0)
+        
         glNormal3f(-1, 0, 0);
         glTexCoord2f(0,  0);  glVertex3f(0, 0, -d);
         glTexCoord2f(sd, 0);  glVertex3f(0, 0,  0);
         glTexCoord2f(sd, sv); glVertex3f(0, h,  0);
         glTexCoord2f(0,  sv); glVertex3f(0, h, -d);
-
-        // Kanan (X=w)
+        
         glNormal3f(1, 0, 0);
         glTexCoord2f(0,  0);  glVertex3f(w, 0,  0);
         glTexCoord2f(sd, 0);  glVertex3f(w, 0, -d);
         glTexCoord2f(sd, sv); glVertex3f(w, h, -d);
         glTexCoord2f(0,  sv); glVertex3f(w, h,  0);
-
-        // Atas (Y=h)
+        
         glNormal3f(0, 1, 0);
         glTexCoord2f(0,  0);  glVertex3f(0, h,  0);
         glTexCoord2f(su, 0);  glVertex3f(w, h,  0);
         glTexCoord2f(su, sd); glVertex3f(w, h, -d);
         glTexCoord2f(0,  sd); glVertex3f(0, h, -d);
-
-        // Bawah (Y=0)
+        
         glNormal3f(0, -1, 0);
         glTexCoord2f(0,  0);  glVertex3f(0, 0, -d);
         glTexCoord2f(su, 0);  glVertex3f(w, 0, -d);
@@ -82,14 +68,30 @@ void drawBlockOutline(float w, float h, float d, float alpha) {
 }
 
 void drawGround() {
-    matGround();
-    glPushMatrix();
-        glTranslatef(-10.0f, 0.0f, -30.0f);
-        drawBlock(80.0f, 0.05f, 60.0f);
-    glPopMatrix();
-
+    float xMin = -6.0f, xMax = 59.0f;
+    float zMin = -25.0f, zMax = 15.0f;
+    float yGround = 0.0f;
+    
     glDisable(GL_LIGHTING);
-    glBegin(GL_LINES);
+    
+    bindTexture(TEX_GROUND);
+    glColor3f(1.0f, 1.0f, 1.0f);  
+    
+    float uMax = (xMax - xMin) / 4.0f;
+    float vMax = (zMax - zMin) / 4.0f;
+    
+    glBegin(GL_QUADS);
+        glNormal3f(0, 1, 0);
+        glTexCoord2f(0,    0);    glVertex3f(xMin, yGround, zMin);
+        glTexCoord2f(uMax, 0);    glVertex3f(xMax, yGround, zMin);
+        glTexCoord2f(uMax, vMax); glVertex3f(xMax, yGround, zMax);
+        glTexCoord2f(0,    vMax); glVertex3f(xMin, yGround, zMax);
+    glEnd();
+    
+    unbindTexture();
+    glEnable(GL_LIGHTING);
+    
+    glDisable(GL_LIGHTING);
     glColor3f(0.35f, 0.35f, 0.38f);
     for (int i = -10; i <= 70; i++) {
         glVertex3f((float)i, 0.06f, -30); glVertex3f((float)i, 0.06f, 30);
@@ -120,7 +122,6 @@ void drawTree(float x, float z, float trunkH, float crownR) {
             glutSolidSphere(lr, 10, 8);
         glPopMatrix();
     }
-
     glPopMatrix();
 }
 

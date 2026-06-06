@@ -23,24 +23,13 @@
 #include "Menu.h"
 #include "Sound.h"
 #include "Cutscene.h"
+#include "Jumpscare.h"
+#include "Shadow.h"
 
 using namespace std;
-
-float playerX      = 33.0f;
-float playerY      = 0.8f;
-float playerZ      = 2.0f;
-float playerSpeed  = 0.12f;
-float pRadius      = 0.25f;
-float playerAngle  = 0.0f;
-float targetAngle  = 0.0f;
-float walkTimer    = 0.0f;
-bool  isWalking    = false;
-
 vector<BoundingBox> colliders;
-
 bool isDoorOpen = false;
 bool introPlayed = false;
-
 
 void drawHUDText(float x, float y, const char* text) {
     glDisable(GL_LIGHTING);
@@ -72,10 +61,46 @@ void drawHUDText(float x, float y, const char* text) {
     glEnable(GL_LIGHTING);
 }
 
+void restartGame(){
+	soundManager.stopAllSounds();
+    playerX = -4.0f;
+    playerY = 0.8f;
+    playerZ = 2.0f;
+    playerAngle = 0.0f;
+    targetAngle = 0.0f;
+    isWalking = false;
+    playerWon = false;
+
+    initDoorAnimations();
+    randomizeLockedRooms();
+    buildPhysicalWorld();
+
+    resetItems();
+    initBot();
+    jumpscareManager.reset();
+    introPlayed = true;
+    startIntroDialog();
+    soundManager.playSound(SOUND_BACKGROUND);
+}
+
+void returnToMenu(){
+    extern int deltaMoveX;
+    extern int deltaMoveZ;
+    playerWon = false;
+    introPlayed = false;
+    deltaMoveX = 0;
+    deltaMoveZ = 0;
+    jumpscareManager.reset();
+    cutsceneManager.stopCutscene();
+    gameState = STATE_MENU;
+    selectedMenuItem = 0;
+    glutPostRedisplay();
+}
+
 void startIntroDialog() {
     if (introPlayed) return;
     
-    cutsceneManager.addDialogLine("Kamu bangun di tempat yang gelap...", 3.0f, true);
+    cutsceneManager.addDialogLine("Aduh kepala ku sakit...", 3.0f, true);
     cutsceneManager.addDialogLine("Dimana aku? Ini... dimana?", 3.0f, true);
     cutsceneManager.addDialogLine("Ada seseorang di sini...", 3.0f, true);
     cutsceneManager.addDialogLine("Aku harus pergi dari sini!", 2.5f, false);
@@ -84,62 +109,130 @@ void startIntroDialog() {
     introPlayed = true;
 }
 
+void drawCoordinateHUD() {
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
+    
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 100, 0, 100);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    char buffer[128];
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
+    glBegin(GL_QUADS);
+        glVertex2f(0, 92);
+        glVertex2f(30, 92);
+        glVertex2f(30, 100);
+        glVertex2f(0, 100);
+    glEnd();
+    glDisable(GL_BLEND);
+    
+    glColor3f(0.0f, 1.0f, 0.0f);
+    snprintf(buffer, sizeof(buffer), "X:%.2f | Y:%.2f | Z:%.2f", playerX, playerY, playerZ);
+    glRasterPos2f(1, 96);
+    for (size_t i = 0; i < strlen(buffer); i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, buffer[i]);
+    }
+    
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+}
+
 void display() {
     if (gameState == STATE_MENU) {
         drawMenu();
+    } else if (gameState == STATE_WIN) {
+        drawWinScreen();
     } else if (gameState == STATE_PLAYING) {
+        if (jumpscareManager.isActive()) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            jumpscareManager.render();
+            glutSwapBuffers();
+            return;
+        }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
 
         setupCamera();
         handleAllLighting();
-
         drawGround();
-        //// drawTrees();
+        drawTrees();
+        drawGate();
+        drawOuterWalls();
+        drawRuangGedung();   
         drawItems();
         drawBot();
+
+        int playerFloor = (int)(playerY / FLOOR_HEIGHT);
+        float shadowY = playerFloor * FLOOR_HEIGHT + 0.06f;
+        updateShadowMatrix(shadowY);
+        beginShadow();
+        drawPlayer();        
+        endShadow();  
         drawPlayer();
-        drawRuangGedung();
-        
-        // PASS 2: Objek transparan (depthMask off)
-	    glDepthMask(GL_FALSE);
-	    // drawFrontWall sudah handle sendiri, tapi sorting tetap penting
-	    glDepthMask(GL_TRUE);
-	        
-        // HUD DEBUG: KOORDINAT PLAYER
-        char coordsStr[64];
-        sprintf(coordsStr, "PLAYER POS -> X: %.2f  Y: %.2f  Z: %.2f", playerX, playerY, playerZ);
-        
-        drawHUDText(2.0f, 95.0f, coordsStr);
-        int currentFloor = (int)(playerY / 4.0f) + 1; 
-        char floorStr[32];
-        sprintf(floorStr, "LANTAI: %d", currentFloor);
-        drawHUDText(2.0f, 91.0f, floorStr);
         drawItemHUD();
-        
-        // Render cutscene dialog if active
+
         if (cutsceneManager.isRunning()) {
             cutsceneManager.render();
         }
-        
         glutSwapBuffers();
     }
 }
 
-
 void update(int v) {
-    handleAllInput();
+    if (gameState != STATE_WIN) {
+        jumpscareManager.update(0.016f);
+    }
+
+    if (jumpscareManager.isActive() && gameState != STATE_WIN) {
+        glutPostRedisplay();
+        glutTimerFunc(16, update, 0);
+        return;
+    }
+
+    inputMovement();
     updateItems(0.016f);
     checkItemPickup();
+    if (!playerWon && allRequiredItemsCollected() && isAtGate()){
+        playerWon = true;
+        cutsceneManager.addDialogLine(
+            "Aku berhasil keluar dari tempat ini...",
+            4.0f,
+            false
+        );
+        cutsceneManager.addDialogLine(
+            "Aku selamat.",
+            3.0f,
+            false
+        );
+            cutsceneManager.startCutscene();
+    }
+    updateBot();
     bool animChanged = updateDoorAnimations(0.016f);
     checkDoorProximity();
-    
-    // Update cutscene
     cutsceneManager.update(0.016f);
+    
+    if (playerWon && !cutsceneManager.isRunning() && gameState != STATE_WIN) {
+        gameState = STATE_WIN;
+        selectedMenuItem = 0;
+    }
     
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
-    updateBot();
 }
 
 void init() {
@@ -152,26 +245,16 @@ void init() {
     initTextures();
     initPosters();
     srand(time(0));
-    
-    // Initialize sound manager
     soundManager.initialize();
-    
-    // Random door state saat game start
+    jumpscareManager.loadTextures();
     isDoorOpen = (rand() % 2) == 0;
-    
     glutIgnoreKeyRepeat(1);
-    
-    // --- RUANGAN TERKUNCI ---
-    // Generate ruangan yang tidak bisa dimasuki secara random
     randomizeLockedRooms();
     buildPhysicalWorld();
     initItems();
     initBot();
-    
-    // Inisialisasi menu
     initMenu();
 }
-
 
 void reshape(int w, int h) {
     glViewport(0, 0, w, h);
@@ -181,36 +264,9 @@ void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-void keyboard(unsigned char key, int x, int y) {
-    if (gameState == STATE_MENU) {
-        handleMenuInput(key);
-    } else if (gameState == STATE_PLAYING) {
-        pressNormalKeys(key, x, y);
-    }
-}
-
-void keyboardUp(unsigned char key, int x, int y) {
-    if (gameState == STATE_PLAYING) {
-        releaseNormalKeys(key, x, y);
-    }
-}
-
-void specialKeys(int key, int x, int y) {
-    if (gameState == STATE_MENU) {
-        if (key == GLUT_KEY_UP) {
-            selectedMenuItem = 0;  // PLAY
-        } else if (key == GLUT_KEY_DOWN) {
-            selectedMenuItem = 1;  // EXIT
-        }
-    }
-}
-
-void mouse(int button, int state, int x, int y) {
-    handleMouseClick(button, state, x, y);
-}
-
 void cleanup() {
     cleanupMenuTextures();
+    jumpscareManager.cleanupTextures();
 }
 
 int main(int argc, char** argv) {
@@ -221,15 +277,12 @@ int main(int argc, char** argv) {
     init();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);   
-    glutKeyboardUpFunc(keyboardUp);
+    glutKeyboardFunc(pressNormalKeys);   
+    glutKeyboardUpFunc(releaseNormalKeys);
     glutSpecialFunc(specialKeys);
     glutMouseFunc(mouse);
     glutTimerFunc(16, update, 0);
-    
-    // Cleanup on exit
     atexit(cleanup);
-    
     glutMainLoop();
     return 0;
 }

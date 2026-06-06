@@ -1,11 +1,6 @@
 #include "Cutscene.h"
-#include "Sound.h"
 
-#ifdef __APPLE__
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+#include "Sound.h"
 
 CutsceneManager cutsceneManager;
 
@@ -25,7 +20,7 @@ void CutsceneManager::startCutscene() {
     currentDialogIndex = 0;
     elapsedTime = 0.0f;
     hasPlayedBell = false;
-    waitingForInput = true;  // Wait for ENTER on first dialog
+    waitingForInput = true;  
     
     if (dialogLines[0].playBellSound) {
         soundManager.playSound(SOUND_BELL);
@@ -46,18 +41,15 @@ void CutsceneManager::stopCutscene() {
 
 void CutsceneManager::advanceDialog() {
     if (!isActive || dialogLines.empty()) return;
-    
     currentDialogIndex++;
     elapsedTime = 0.0f;
     hasPlayedBell = false;
     
-    // Check if cutscene finished
     if (currentDialogIndex >= (int)dialogLines.size()) {
         stopCutscene();
         return;
     }
     
-    // Play bell sound for next dialog if needed
     if (dialogLines[currentDialogIndex].playBellSound) {
         soundManager.playSound(SOUND_BELL);
         hasPlayedBell = true;
@@ -66,16 +58,12 @@ void CutsceneManager::advanceDialog() {
 
 void CutsceneManager::update(float deltaTime) {
     if (!isActive || dialogLines.empty()) return;
-    
-    // No auto-advance - waiting for input
 }
 
 void CutsceneManager::render() {
     if (!isActive || currentDialogIndex >= (int)dialogLines.size()) return;
-    
     const string& dialogText = dialogLines[currentDialogIndex].text;
     
-    // Setup 2D projection for HUD text
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
     
@@ -88,11 +76,9 @@ void CutsceneManager::render() {
     glPushMatrix();
     glLoadIdentity();
     
-    // Enable blending for transparency
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    // Draw semi-transparent background for dialog box
     glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
     glBegin(GL_QUADS);
         glVertex2f(100, 550);
@@ -101,7 +87,6 @@ void CutsceneManager::render() {
         glVertex2f(100, 680);
     glEnd();
     
-    // Draw dialog border
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2.0f);
     glBegin(GL_LINE_LOOP);
@@ -111,15 +96,13 @@ void CutsceneManager::render() {
         glVertex2f(100, 680);
     glEnd();
     
-    // Draw "Umar:" name
-    glColor3f(1.0f, 0.8f, 0.0f);  // Golden color for name
+    glColor3f(1.0f, 0.8f, 0.0f); 
     glRasterPos2f(120, 620);
     const char* name = "Umar: ";
     for (size_t i = 0; i < strlen(name); i++) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, name[i]);
     }
     
-    // Render dialog text
     glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2f(250, 620);
     
@@ -127,7 +110,6 @@ void CutsceneManager::render() {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, dialogText[i]);
     }
     
-    // Draw "Press ENTER" hint
     glColor3f(0.7f, 0.7f, 0.7f);
     glRasterPos2f(120, 570);
     const char* hint = "[Press ENTER to continue]";
@@ -135,7 +117,6 @@ void CutsceneManager::render() {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, hint[i]);
     }
     
-    // Restore matrices
     glDisable(GL_BLEND);
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);

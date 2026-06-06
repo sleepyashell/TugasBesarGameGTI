@@ -1,3 +1,9 @@
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 #ifndef BOT_H
 #define BOT_H
 
@@ -15,7 +21,7 @@ struct EnemyBot {
     float y;
     float z;
     float speed;
-    float dirX;
+    float visionX;
     int currentFloor;
     int targetNodeIndex; 
     bool movingRight;
@@ -23,14 +29,10 @@ struct EnemyBot {
     bool isSearching;
 };
 
-extern EnemyBot ghostBot;
-
-// Fungsi Utama
+extern EnemyBot ghostBot[3];
 void initBot();
 void updateBot();
 void drawBot();
-
-// Fungsi Modularisasi State AI (Helper)
 void handleStairInterpolation();
 bool scanForPlayer();
 void executeChaseMode(int playerFloor);

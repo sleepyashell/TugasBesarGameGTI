@@ -24,12 +24,12 @@ HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
 CommandLine=
-Folders=Body,Header,Images
+Folders=Body,Header,"Sound Design","Textures Image"
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=59
+UnitCount=51
 
 [VersionInfo]
 Major=1
@@ -192,7 +192,7 @@ BuildCmd=
 
 [Unit15]
 FileName=poster1.bmp
-Folder=Images
+Folder=Textures Image
 Compile=0
 Link=0
 Priority=1000
@@ -218,33 +218,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit18]
-FileName=Bot.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit19]
-FileName=Building.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit20]
-FileName=Drawing.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit21]
 FileName=horror_game
 Folder=
 Compile=0
@@ -253,35 +226,17 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit22]
+[Unit19]
 FileName=Item.h
-CompileCpp=1
 Folder=Header
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+CompileCpp=1
 
-[Unit23]
-FileName=Item.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit24]
-FileName=Main.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit25]
+[Unit20]
 FileName=Makefile.win
 Folder=
 Compile=0
@@ -290,26 +245,17 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit26]
-FileName=Material.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit27]
+[Unit21]
 FileName=Player.cpp
-CompileCpp=1
 Folder=Body
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+CompileCpp=1
 
-[Unit28]
+[Unit22]
 FileName=Player.h
 CompileCpp=1
 Folder=Header
@@ -319,71 +265,44 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit29]
-FileName=Player.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit30]
+[Unit23]
 FileName=poster2.bmp
-Folder=Images
+Folder=Textures Image
 Compile=0
 Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit31]
+[Unit24]
 FileName=poster3.bmp
-Folder=Images
+Folder=Textures Image
 Compile=0
 Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit32]
+[Unit25]
 FileName=poster4.bmp
-Folder=Images
+Folder=Textures Image
 Compile=0
 Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit33]
-FileName=Texture.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit34]
-FileName=World.o
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit35]
+[Unit26]
 FileName=Input.h
-CompileCpp=1
 Folder=Header
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+CompileCpp=1
 
-[Unit36]
+[Unit27]
 FileName=Input.cpp
 CompileCpp=1
 Folder=Body
@@ -393,7 +312,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit37]
+[Unit28]
 FileName=Camera.cpp
 CompileCpp=1
 Folder=Body
@@ -403,8 +322,97 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit38]
+[Unit29]
 FileName=Camera.h
+Folder=Header
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+CompileCpp=1
+
+[Unit30]
+FileName=Lighting.cpp
+Folder=Body
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+CompileCpp=1
+
+[Unit31]
+FileName=Lighting.h
+Folder=Header
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+CompileCpp=1
+
+[Unit32]
+FileName=floor_title.bmp
+Folder=Textures Image
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit33]
+FileName=Menu.h
+Folder=Header
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+CompileCpp=1
+
+[Unit34]
+FileName=Menu.cpp
+Folder=Body
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+CompileCpp=1
+
+[Unit35]
+FileName=.DS_Store
+CompileCpp=1
+Folder=
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit36]
+FileName=compile.log
+CompileCpp=1
+Folder=
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit37]
+FileName=Cutscene.cpp
+CompileCpp=1
+Folder=Body
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit38]
+FileName=Cutscene.h
 CompileCpp=1
 Folder=Header
 Compile=1
@@ -414,28 +422,28 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit39]
-FileName=Lighting.cpp
+FileName=CUTSCENE_SOUND_GUIDE.md
 CompileCpp=1
-Folder=Body
-Compile=1
-Link=1
+Folder=
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
 [Unit40]
-FileName=Lighting.h
+FileName=HorrorGame
 CompileCpp=1
-Folder=Header
-Compile=1
-Link=1
+Folder=
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
 [Unit41]
-FileName=floor_title.bmp
-Folder=Images
+FileName=kentung
+Folder=
 Compile=0
 Link=0
 Priority=1000
@@ -443,17 +451,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit42]
-FileName=Menu.h
-CompileCpp=1
-Folder=Header
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit43]
-FileName=Menu.cpp
+FileName=Sound.cpp
 CompileCpp=1
 Folder=Body
 Compile=1
@@ -462,9 +460,19 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
+[Unit43]
+FileName=Sound.h
+CompileCpp=1
+Folder=Header
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
 [Unit44]
-FileName=.DS_Store
-Folder=2.5D Game
+FileName=backsound.wav
+Folder=
 Compile=0
 Link=0
 Priority=1000
@@ -472,8 +480,8 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit45]
-FileName=2.5D Game.exe
-Folder=2.5D Game
+FileName=bellsound.wav
+Folder=
 Compile=0
 Link=0
 Priority=1000
@@ -481,27 +489,29 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit46]
-FileName=Camera.o
-Folder=2.5D Game
-Compile=0
-Link=0
+FileName=Jumpscare.h
+Folder=Header
+Compile=1
+Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+CompileCpp=1
 
 [Unit47]
-FileName=compile.log
-Folder=2.5D Game
-Compile=0
-Link=0
+FileName=Jumpscare.cpp
+Folder=Body
+Compile=1
+Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
+CompileCpp=1
 
 [Unit48]
-FileName=Cutscene.cpp
+FileName=Shadow.cpp
 CompileCpp=1
-Folder=2.5D Game
+Folder=Body
 Compile=1
 Link=1
 Priority=1000
@@ -509,9 +519,9 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit49]
-FileName=Cutscene.h
+FileName=Shadow.h
 CompileCpp=1
-Folder=2.5D Game
+Folder=Header
 Compile=1
 Link=1
 Priority=1000
@@ -519,8 +529,8 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit50]
-FileName=CUTSCENE_SOUND_GUIDE.md
-Folder=2.5D Game
+FileName=wall.bmp
+Folder=Textures Image
 Compile=0
 Link=0
 Priority=1000
@@ -528,8 +538,8 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit51]
-FileName=HorrorGame
-Folder=2.5D Game
+FileName=ground.bmp
+Folder=Textures Image
 Compile=0
 Link=0
 Priority=1000
@@ -607,6 +617,26 @@ FileName=bellsound.wav
 Folder=2.5D Game
 Compile=0
 Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit60]
+FileName=Jumpscare.h
+CompileCpp=1
+Folder=Header
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit61]
+FileName=Jumpscare.cpp
+CompileCpp=1
+Folder=Body
+Compile=1
+Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
